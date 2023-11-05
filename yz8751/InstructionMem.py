@@ -2,7 +2,7 @@ class InsMem(object):
     def __init__(self, name, ioDir):
         self.id = name
 
-        with open(ioDir + "/input/testcase2/imem.txt") as im:
+        with open(ioDir + "/input/testcase1/imem.txt") as im:
             self.IMem = [data.replace("\n", "") for data in im.readlines()]
 
     def readInstr(self, ReadAddress):

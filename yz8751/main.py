@@ -12,6 +12,7 @@ MemSize = 1000  # memory size, in reality, the memory size should be 2^32, but f
 
 
 def bin_to_int(binary_str):
+    print('binary str:', binary_str, int(binary_str, 2))
     # Check if the number is negative (MSB is 1)
     if binary_str[0] == "1":
         # Compute negative number
@@ -122,7 +123,8 @@ class SingleStageCore(Core):
             self.state.EX["Wrt_reg_addr"] = decodeResult["rd"]
             # this will be PC + 4
             self.state.EX["Read_data1"] = self.state.IF["PC"] 
-            self.state.EX["Read_data1"] = 4
+            self.state.EX["Read_data2"] = 4
+            print('j type data:', self.state.EX["Read_data1"], self.state.EX["Read_data2"])
 
         # * 3. Execute (EX)
         self.state.EX["nop"] = self.state.ID["nop"]
@@ -237,6 +239,8 @@ class SingleStageCore(Core):
             self.nextState.IF["PC"] = (
                 self.state.IF["PC"] + bin_to_int(self.state.EX["Imm"]) 
             )
+
+            print('j type next pc:', self.nextState.IF["PC"])
         else: 
             # PC + 1 for all instructions except branches
             self.nextState.IF["PC"] = self.state.IF["PC"] + 4
@@ -262,11 +266,12 @@ class SingleStageCore(Core):
         # Check for Store instructions (SW)
         elif decodeResult["type"] == "S" and decodeResult["opcode"] == "0100011":
             # * For SW instructions, we need to write to memory
+            rs2_index = decodeResult["rs2"]
+            store_data = self.myRF.readRF(rs2_index)
             self.state.MEM["rd_mem"] = 0
             self.state.MEM["wrt_mem"] = 1
-            self.state.MEM["Store_data"] = self.state.EX[
-                "Read_data2"
-            ]  # Data to be stored
+            self.state.MEM["Store_data"] = store_data  # Data to be stored
+            print('store data:', store_data)
             self.state.MEM["wrt_enable"] = 0
             # In the case of store, we don't write to the register file, so wrt_enable is False
 
@@ -492,7 +497,7 @@ if __name__ == "__main__":
     while True:
         if not ssCore.halted:
             ssCore.step()
-            print("step")
+            print("=" * 20)
 
         # ! open the five step core later
         # if not fsCore.halted:

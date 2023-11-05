@@ -64,12 +64,18 @@ class Decoder:
         # J-Type Instructions
         elif opcode == 0x6F:
             decoded_fields["type"] = "J"
-            decoded_fields["Imm"] = (
-                ((int(instruction, 16) >> 31) & 0x1)
-                | ((int(instruction, 16) >> 12) & 0xFF)
-                | ((int(instruction, 16) >> 20) & 0x1)
-                | ((int(instruction, 16) >> 21) & 0x3FF)
-            )
+            instruction_int = int(instruction, 16)
+
+            # Extracting the bits from the instruction
+            imm20 = (instruction_int >> 31) & 0x1
+            imm101 = (instruction_int >> 21) & 0x3FF
+            imm11 = (instruction_int >> 20) & 0x1
+            imm1912 = (instruction_int >> 12) & 0xFF
+
+            # Reconstructing the immediate field in the correct order (left to right: 20, 10:1, 11, 19:12)
+            imm = (imm20 << 20) | (imm101 << 1) | (imm11 << 11) | (imm1912 << 12)
+
+            decoded_fields["Imm"] = imm
             decoded_fields["rd"] = (int(instruction, 16) >> 7) & 0x1F
 
         else:
