@@ -23,8 +23,8 @@ def bin_to_int(binary_str):
 
 
 class Core(object):
-    def __init__(self, ioDir, imem, dmem):
-        self.myRF = RegisterFile(ioDir)
+    def __init__(self, ioDir, imem, dmem, prefix=""):
+        self.myRF = RegisterFile(ioDir, prefix)
         self.cycle = 0
         self.halted = False
         self.ioDir = ioDir
@@ -36,10 +36,9 @@ class Core(object):
 
 class SingleStageCore(Core):
     def __init__(self, ioDir, imem, dmem):
-        super(SingleStageCore, self).__init__(ioDir + "/SS_", imem, dmem)
-        self.opFilePath = os.path.join(
-            "output_yz8751", ioDir + "StateResult_SS.txt"
-        )
+        super(SingleStageCore, self).__init__(ioDir, imem, dmem, "SS_")
+        self.opFilePath = os.path.join(ioDir, "output_yz8751", "StateResult_SS.txt")
+
 
         # This will create a path like '/Users/yunzezhao/Code/CSA_Project/output_yz8751/PerformanceMetrics_Result.txt'
 
@@ -436,9 +435,8 @@ class SingleStageCore(Core):
 
         # File path for performance metrics
         # Assuming self.ioDir is an additional directory name or a prefix/suffix for the filename
-        print(os.path.join("..", "output_yz8751", self.ioDir + "PerformanceMetrics_Result.txt"))
         print(self.ioDir)
-        performance_metrics_file_path = os.path.join(self.ioDir +  "SS_PerformanceMetrics_Result.txt")
+        performance_metrics_file_path = os.path.join( self.ioDir, "output_yz8751", "PerformanceMetrics_Result.txt")
 
         print(performance_metrics_file_path)
         with open(performance_metrics_file_path, "a") as pf:
@@ -447,7 +445,7 @@ class SingleStageCore(Core):
 
 class FiveStageCore(Core):
     def __init__(self, ioDir, imem, dmem):
-        super(FiveStageCore, self).__init__(ioDir + "\\FS_", imem, dmem)
+        super(FiveStageCore, self).__init__(ioDir, imem, dmem, "FS_")
         self.opFilePath = ioDir + "\\StateResult_FS.txt"
 
     def step(self):

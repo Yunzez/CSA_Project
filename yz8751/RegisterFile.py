@@ -1,8 +1,9 @@
 import os
 
 class RegisterFile(object):
-    def __init__(self, ioDir):
-        self.outputFile = os.path.join("output_yz8751", ioDir + "PerformanceMetrics_Result.txt")
+    def __init__(self, ioDir, prefix):
+        print( os.path.join(ioDir, "output_yz8751", "RFResult.txt"))
+        self.outputFile = os.path.join(ioDir, "output_yz8751", prefix + "RFResult.txt")
         self.Registers = [0x0 for i in range(32)]
 
     def readRF(self, Reg_addr):
