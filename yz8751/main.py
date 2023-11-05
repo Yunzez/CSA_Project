@@ -12,7 +12,7 @@ MemSize = 1000  # memory size, in reality, the memory size should be 2^32, but f
 
 
 def bin_to_int(binary_str):
-    print('binary str:', binary_str, int(binary_str, 2))
+    print("binary str:", binary_str, int(binary_str, 2))
     # Check if the number is negative (MSB is 1)
     if binary_str[0] == "1":
         # Compute negative number
@@ -37,7 +37,12 @@ class Core(object):
 class SingleStageCore(Core):
     def __init__(self, ioDir, imem, dmem):
         super(SingleStageCore, self).__init__(ioDir + "/SS_", imem, dmem)
-        self.opFilePath = ioDir + "/output_yz8751/StateResult_SS.txt"
+        self.opFilePath = os.path.join(
+            "output_yz8751", ioDir + "StateResult_SS.txt"
+        )
+
+        # This will create a path like '/Users/yunzezhao/Code/CSA_Project/output_yz8751/PerformanceMetrics_Result.txt'
+
         print("single stage core location:", self.opFilePath)
         print("start single stage core")
         self.alu = ALU()
@@ -47,7 +52,12 @@ class SingleStageCore(Core):
         print("single core steps forward")
         # 1. Instruction Fetch (IF)
         current_instruction = self.ext_imem.readInstr(self.state.IF["PC"])
-        print('current pc:', self.state.IF["PC"], 'current instruction:', current_instruction)
+        print(
+            "current pc:",
+            self.state.IF["PC"],
+            "current instruction:",
+            current_instruction,
+        )
         # * 2. Instruction Decode (ID)
         decodeResult = Decoder().decode(current_instruction)
         print("decode result:", decodeResult)
@@ -122,9 +132,11 @@ class SingleStageCore(Core):
             self.state.EX["Imm"] = decodeResult["Imm"]
             self.state.EX["Wrt_reg_addr"] = decodeResult["rd"]
             # this will be PC + 4
-            self.state.EX["Read_data1"] = self.state.IF["PC"] 
+            self.state.EX["Read_data1"] = self.state.IF["PC"]
             self.state.EX["Read_data2"] = 4
-            print('j type data:', self.state.EX["Read_data1"], self.state.EX["Read_data2"])
+            print(
+                "j type data:", self.state.EX["Read_data1"], self.state.EX["Read_data2"]
+            )
 
         # * 3. Execute (EX)
         self.state.EX["nop"] = self.state.ID["nop"]
@@ -222,29 +234,28 @@ class SingleStageCore(Core):
         # ! Execute branch instructions
         if decodeResult["type"] == "B":
             if decodeResult["funct3"] == "000" and alu_result == 0:  # BEQ
-                self.nextState.IF["PC"] = (
-                    self.state.IF["PC"] + bin_to_int(self.state.EX["Imm"]) 
+                self.nextState.IF["PC"] = self.state.IF["PC"] + bin_to_int(
+                    self.state.EX["Imm"]
                 )
                 print("BEQ branch taken")
             elif decodeResult["funct3"] == "001" and alu_result != 0:  # BNE
                 print(bin_to_int(self.state.EX["Imm"]))
-                self.nextState.IF["PC"] = (
-                    self.state.IF["PC"] + bin_to_int(self.state.EX["Imm"])  
+                self.nextState.IF["PC"] = self.state.IF["PC"] + bin_to_int(
+                    self.state.EX["Imm"]
                 )
                 print("BNE branch taken")
             else:
                 print("branch not taken")
                 self.nextState.IF["PC"] = self.state.IF["PC"] + 4
         elif decodeResult["type"] == "J":
-            self.nextState.IF["PC"] = (
-                self.state.IF["PC"] + bin_to_int(self.state.EX["Imm"]) 
+            self.nextState.IF["PC"] = self.state.IF["PC"] + bin_to_int(
+                self.state.EX["Imm"]
             )
 
-            print('j type next pc:', self.nextState.IF["PC"])
-        else: 
+            print("j type next pc:", self.nextState.IF["PC"])
+        else:
             # PC + 1 for all instructions except branches
             self.nextState.IF["PC"] = self.state.IF["PC"] + 4
-
 
         # ! set state for next action
 
@@ -271,7 +282,7 @@ class SingleStageCore(Core):
             self.state.MEM["rd_mem"] = 0
             self.state.MEM["wrt_mem"] = 1
             self.state.MEM["Store_data"] = store_data  # Data to be stored
-            print('store data:', store_data)
+            print("store data:", store_data)
             self.state.MEM["wrt_enable"] = 0
             # In the case of store, we don't write to the register file, so wrt_enable is False
 
@@ -399,7 +410,7 @@ class SingleStageCore(Core):
             "-" * 70 + "\n",
             "State after executing cycle: " + str(cycle) + "\n",
         ]
-        printstate.append("IF.PC: " + str(state.IF["PC"] ) + "\n")
+        printstate.append("IF.PC: " + str(state.IF["PC"]) + "\n")
         printstate.append("IF.nop: " + str(state.IF["nop"]) + "\n")
 
         if cycle == 0:
@@ -420,15 +431,19 @@ class SingleStageCore(Core):
             f"Total Execution Cycles: {cycle}\n",
             f"Total Instructions Executed: {total_instructions}\n",
             f"Average CPI: {average_cpi}\n",
-            f"Instructions Per Cycle (IPC): {ipc}\n"
+            f"Instructions Per Cycle (IPC): {ipc}\n",
         ]
 
         # File path for performance metrics
-        performance_file_path = ioDir + "/output_yz8751/PerformanceMetrics_Result.txt"
+        # Assuming self.ioDir is an additional directory name or a prefix/suffix for the filename
+        print(os.path.join("..", "output_yz8751", self.ioDir + "PerformanceMetrics_Result.txt"))
+        print(self.ioDir)
+        performance_metrics_file_path = os.path.join(self.ioDir +  "SS_PerformanceMetrics_Result.txt")
 
-       
-        with open(performance_file_path, "a") as pf:
+        print(performance_metrics_file_path)
+        with open(performance_metrics_file_path, "a") as pf:
             pf.writelines(performance_metrics)
+
 
 class FiveStageCore(Core):
     def __init__(self, ioDir, imem, dmem):
@@ -512,6 +527,8 @@ if __name__ == "__main__":
     dmem_fs = DataMem("FS", ioDir)
 
     ssCore = SingleStageCore(ioDir, imem, dmem_ss)
+
+    # ! open the five step core later
     fsCore = FiveStageCore(ioDir, imem, dmem_fs)
 
     while True:

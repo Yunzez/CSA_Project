@@ -1,3 +1,4 @@
+import os
 class DataMem(object):
     def __init__(self, name, ioDir):
         self.id = name
@@ -33,6 +34,6 @@ class DataMem(object):
         # write data into byte addressable memory
 
     def outputDataMem(self):
-        resPath = self.ioDir + "/output_yz8751/" + self.id + "_DMEMResult.txt"
+        resPath = os.path.join('output_yz8751', self.ioDir + self.id + "_DMEMResult.txt")
         with open(resPath, "w") as rp:
             rp.writelines([str(data) + "\n" for data in self.DMem])
