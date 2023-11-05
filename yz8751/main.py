@@ -37,7 +37,7 @@ class Core(object):
 class SingleStageCore(Core):
     def __init__(self, ioDir, imem, dmem):
         super(SingleStageCore, self).__init__(ioDir + "/SS_", imem, dmem)
-        self.opFilePath = ioDir + "/StateResult_SS.txt"
+        self.opFilePath = ioDir + "/output_yz8751/StateResult_SS.txt"
         print("single stage core location:", self.opFilePath)
         print("start single stage core")
         self.alu = ALU()
@@ -388,7 +388,7 @@ class SingleStageCore(Core):
         self.printState(
             self.nextState, self.cycle
         )  # print states after executing cycle 0, cycle 1, cycle 2 ...
-
+        self.writePerformanceMetrics(self.cycle)
         self.state = (
             self.nextState
         )  # The end of the cycle and updates the current state with the values calculated in this cycle
@@ -409,6 +409,26 @@ class SingleStageCore(Core):
         with open(self.opFilePath, perm) as wf:
             wf.writelines(printstate)
 
+    def writePerformanceMetrics(self, cycle):
+        # Assuming one instruction per cycle
+        total_instructions = cycle
+        average_cpi = 1  # For single-cycle CPU, CPI is always 1
+        ipc = 1 / average_cpi  # Inverse of CPI, also 1 for single-cycle CPU
+
+        # Create a list of strings to write to the file
+        performance_metrics = [
+            f"Total Execution Cycles: {cycle}\n",
+            f"Total Instructions Executed: {total_instructions}\n",
+            f"Average CPI: {average_cpi}\n",
+            f"Instructions Per Cycle (IPC): {ipc}\n"
+        ]
+
+        # File path for performance metrics
+        performance_file_path = ioDir + "/output_yz8751/PerformanceMetrics_Result.txt"
+
+       
+        with open(performance_file_path, "a") as pf:
+            pf.writelines(performance_metrics)
 
 class FiveStageCore(Core):
     def __init__(self, ioDir, imem, dmem):

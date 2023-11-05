@@ -1,0 +1,152 @@
+Total Execution Cycles: 0
+Total Instructions Executed: 0
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 1
+Total Instructions Executed: 1
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 2
+Total Instructions Executed: 2
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 3
+Total Instructions Executed: 3
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 4
+Total Instructions Executed: 4
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 5
+Total Instructions Executed: 5
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 6
+Total Instructions Executed: 6
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 7
+Total Instructions Executed: 7
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 8
+Total Instructions Executed: 8
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 9
+Total Instructions Executed: 9
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 10
+Total Instructions Executed: 10
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 11
+Total Instructions Executed: 11
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 12
+Total Instructions Executed: 12
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 13
+Total Instructions Executed: 13
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 14
+Total Instructions Executed: 14
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 15
+Total Instructions Executed: 15
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 16
+Total Instructions Executed: 16
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 17
+Total Instructions Executed: 17
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 18
+Total Instructions Executed: 18
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 19
+Total Instructions Executed: 19
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 20
+Total Instructions Executed: 20
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 21
+Total Instructions Executed: 21
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 22
+Total Instructions Executed: 22
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 23
+Total Instructions Executed: 23
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 24
+Total Instructions Executed: 24
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 25
+Total Instructions Executed: 25
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 26
+Total Instructions Executed: 26
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 27
+Total Instructions Executed: 27
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 28
+Total Instructions Executed: 28
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 29
+Total Instructions Executed: 29
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 30
+Total Instructions Executed: 30
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 31
+Total Instructions Executed: 31
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 32
+Total Instructions Executed: 32
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 33
+Total Instructions Executed: 33
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 34
+Total Instructions Executed: 34
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 35
+Total Instructions Executed: 35
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 36
+Total Instructions Executed: 36
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
+Total Execution Cycles: 37
+Total Instructions Executed: 37
+Average CPI: 1
+Instructions Per Cycle (IPC): 1.0
