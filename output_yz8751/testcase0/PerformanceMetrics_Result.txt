@@ -1,6 +1,6 @@
 IO Directory: /Users/yunzezhao/Code/CSA_Project/output_yz8751/PerformanceMetrics_Result.txt
 Single Stage Core Performance Metrics-----------------------------
-Number of cycles taken: 26
-Cycles per instruction: 2.36364
-Instructions per cycle: 0.423077
+Number of cycles taken: 4
+Cycles per instruction: 0.8
+Instructions per cycle: 1.25
 Five Stage Core Performance Metrics-----------------------------

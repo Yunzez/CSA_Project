@@ -7,12 +7,18 @@ from State import State
 from InstructionMem import InsMem
 from DataMem import DataMem
 from RegisterFile import RegisterFile
+from ALU_Control import ALU_control
 
 MemSize = 1000  # memory size, in reality, the memory size should be 2^32, but for this lab, for the space resaon, we keep it as this large number, but the memory is still 32-bit addressable.
 
 
-def bin_to_int(binary_str):
-    print("binary str:", binary_str, int(binary_str, 2))
+def bin_to_int(value):
+    if isinstance(value, int):
+        return value
+
+    # Ensure the value is a string from this point onwards
+    binary_str = str(value)
+
     # Check if the number is negative (MSB is 1)
     if binary_str[0] == "1":
         # Compute negative number
@@ -38,19 +44,22 @@ class SingleStageCore(Core):
     def __init__(self, ioDir, imem, dmem):
         super(SingleStageCore, self).__init__(ioDir, imem, dmem, "SS_")
         self.opFilePath = os.path.join(ioDir, "output_yz8751", "StateResult_SS.txt")
-
+        self.Instrs = []
 
         # This will create a path like '/Users/yunzezhao/Code/CSA_Project/output_yz8751/PerformanceMetrics_Result.txt'
 
         print("single stage core location:", self.opFilePath)
         print("start single stage core")
         self.alu = ALU()
+        self.alu_control = ALU_control()
         self.decoder = Decoder()
 
     def step(self):
         print("single core steps forward")
-        # 1. Instruction Fetch (IF)
+        # * 1. Instruction Fetch (IF)
         current_instruction = self.ext_imem.readInstr(self.state.IF["PC"])
+        if current_instruction not in self.Instrs:
+            self.Instrs.append(current_instruction)
         print(
             "current pc:",
             self.state.IF["PC"],
@@ -61,25 +70,10 @@ class SingleStageCore(Core):
         decodeResult = Decoder().decode(current_instruction)
         print("decode result:", decodeResult)
         self.state.ID["Instr"] = current_instruction
-        self.state.ID["nop"] = decodeResult["type"] == "NOP"  # NOP instruction
-        print("nop:", self.state.ID["nop"])
 
-        if decodeResult["type"] == "HALT":
+        if decodeResult["type"] == "HALT" or decodeResult["type"] == "NOP":
             self.halted = True
             return
-
-        ALU_CONTROL_CODES = {
-            "ADD": "0010",
-            "SUB": "0110",
-            "AND": "0000",
-            "OR": "0001",
-            "XOR": "0111",
-            "None": "1000",
-        }
-
-        alu_control_input = ALU_CONTROL_CODES[
-            "None"
-        ]  # Default to ADD for initialization
 
         # Determine ALUOp bits
         if decodeResult["type"] == "R":
@@ -91,9 +85,7 @@ class SingleStageCore(Core):
         elif decodeResult["type"] == "B":
             self.state.EX["alu_op"] = "01"  # 01 for branch instructions (B-type)
         elif decodeResult["type"] == "J":
-            self.state.EX[
-                "alu_op"
-            ] = "11"  # Reusing '11' for J-type, but will need special handling
+            self.state.EX["alu_op"] = "11"  # Reusing '11' for J-type, but will need special handling
 
         if decodeResult["type"] == "I":
             self.state.EX["is_I_type"] = True
@@ -123,9 +115,7 @@ class SingleStageCore(Core):
             self.state.EX["Rt"] = decodeResult["rs2"]
             self.state.EX["Read_data1"] = self.myRF.readRF(decodeResult["rs1"])
             self.state.EX["Imm"] = decodeResult["Imm"]
-            self.state.EX[
-                "is_I_type"
-            ] = True  # ! we need this to be true so imm is used instead of Read_data2
+            self.state.EX["is_I_type"] = True  # ! we need this to be true so imm is used instead of Read_data2
 
         if decodeResult["type"] == "J":
             self.state.EX["Imm"] = decodeResult["Imm"]
@@ -133,212 +123,75 @@ class SingleStageCore(Core):
             # this will be PC + 4
             self.state.EX["Read_data1"] = self.state.IF["PC"]
             self.state.EX["Read_data2"] = 4
-            print(
-                "j type data:", self.state.EX["Read_data1"], self.state.EX["Read_data2"]
-            )
+            print("j type data:", self.state.EX["Read_data1"], self.state.EX["Read_data2"])
 
         # * 3. Execute (EX)
-        self.state.EX["nop"] = self.state.ID["nop"]
-
-        if self.state.EX["nop"]:
-            pass
-
         # * types include S I B J R
 
-        if self.state.EX["alu_op"] == "10":  # R-type operations
-            funct3 = decodeResult["funct3"]
-            if funct3 == "000":
-                funct7 = decodeResult["funct7"]
-                alu_control_input = (
-                    ALU_CONTROL_CODES["ADD"]
-                    if funct7 == "0000000"
-                    else ALU_CONTROL_CODES["SUB"]
-                )
-            elif funct3 == "100":
-                alu_control_input = ALU_CONTROL_CODES["XOR"]  # "XOR"
-            elif funct3 == "110":
-                alu_control_input = ALU_CONTROL_CODES["OR"]
-            elif funct3 == "111":
-                alu_control_input = ALU_CONTROL_CODES["ADD"]
-        elif self.state.EX["alu_op"] == "11":  # I-type operations including JAL
-            if decodeResult["type"] == "I":
-                funct3 = decodeResult["funct3"]
-                print("funct3:", funct3, funct3 == "000")
-                if funct3 == "000":
-                    alu_control_input = ALU_CONTROL_CODES["ADD"]  # "ADDI"
-                elif funct3 == "100":
-                    alu_control_input = ALU_CONTROL_CODES["XOR"]  # "XORI"
-                elif funct3 == "110":
-                    alu_control_input = ALU_CONTROL_CODES["OR"]  # "ORI"
-                elif funct3 == "111":
-                    alu_control_input = ALU_CONTROL_CODES["AND"]  # "ANDI"
-            elif decodeResult["type"] == "J":
-                alu_control_input = ALU_CONTROL_CODES[
-                    "ADD"
-                ]  # JAL will use ADD to compute the next PC
-        elif self.state.EX["alu_op"] == "00":  # S-type operations (store)
-            alu_control_input = ALU_CONTROL_CODES[
-                "ADD"
-            ]  # Store uses ADD for address calculation
-        elif self.state.EX["alu_op"] == "01":  # B-type operations (branch)
-            alu_control_input = ALU_CONTROL_CODES[
-                "SUB"
-            ]  # Branches use SUB for comparison
+        alu_control_input = self.alu_control.get_control_bits(
+            decodeResult["type"], self.state.EX["alu_op"], decodeResult["funct3"] if "funct3" in decodeResult else None, decodeResult["funct7"] if "funct7" in decodeResult else None
+        )
+        print("alu operation:", alu_control_input, "add imm ?", self.state.EX["is_I_type"])
 
-        print("alu operation:", alu_control_input)
-        print("add imm ?", self.state.EX["is_I_type"])
-
-        # Pass the appropriate arguments to the ALU based on the instruction type
         alu_result = None
-
-        # print('data 1: ', self.state.EX["Read_data1"], 'data 2:', self.state.EX["Read_data2"] if self.state.EX["Read_data2"] else 0, 'imm:', self.state.EX["Imm"] if self.state.EX["Imm"] else 0 )
-
-        if self.state.EX["is_I_type"]:
-            # Convert both operands to integers
-            data1 = (
-                bin_to_int(self.state.EX["Read_data1"])
-                if isinstance(self.state.EX["Read_data1"], str)
-                else self.state.EX["Read_data1"]
-            )
-            imm = (
-                bin_to_int(self.state.EX["Imm"])
-                if isinstance(self.state.EX["Imm"], str)
-                else self.state.EX["Imm"]
-            )
-            alu_result = self.alu.operate(
-                alu_control_input,
-                data1,
-                imm,
-            )
-
-        else:
-            data1 = (
-                int(self.state.EX["Read_data1"], 2)
-                if isinstance(self.state.EX["Read_data1"], str)
-                else self.state.EX["Read_data1"]
-            )
-            data2 = (
-                int(self.state.EX["Read_data2"], 2)
-                if isinstance(self.state.EX["Read_data2"], str)
-                else self.state.EX["Read_data2"]
-            )
-            alu_result = self.alu.operate(
-                alu_control_input,
-                data1,
-                data2,
-            )
+        data1 = bin_to_int(self.state.EX["Read_data1"])
+        data2 = bin_to_int(self.state.EX["Read_data2"] if not self.state.EX["is_I_type"] else self.state.EX["Imm"])
+        alu_result = self.alu.operate(alu_control_input, data1, data2)
 
         print("alu result:", alu_result)
 
         # ! Execute branch instructions
         if decodeResult["type"] == "B":
-            if decodeResult["funct3"] == "000" and alu_result == 0:  # BEQ
-                self.nextState.IF["PC"] = self.state.IF["PC"] + bin_to_int(
-                    self.state.EX["Imm"]
-                )
-                print("BEQ branch taken")
-            elif decodeResult["funct3"] == "001" and alu_result != 0:  # BNE
-                print(bin_to_int(self.state.EX["Imm"]))
-                self.nextState.IF["PC"] = self.state.IF["PC"] + bin_to_int(
-                    self.state.EX["Imm"]
-                )
-                print("BNE branch taken")
+            if (decodeResult["funct3"] == "000" and alu_result == 0) or (decodeResult["funct3"] == "001" and alu_result != 0):
+                self.nextState.IF["PC"] += bin_to_int(self.state.EX["Imm"])
+                if decodeResult["funct3"] == "000":
+                    print("BEQ branch taken")
+                if decodeResult["funct3"] == "001":
+                    print("BNE branch taken")
             else:
-                print("branch not taken")
-                self.nextState.IF["PC"] = self.state.IF["PC"] + 4
+                self.nextState.IF["PC"] += 4
         elif decodeResult["type"] == "J":
-            self.nextState.IF["PC"] = self.state.IF["PC"] + bin_to_int(
-                self.state.EX["Imm"]
-            )
-
+            print("j type imm:", self.state.EX["Imm"], bin_to_int(self.state.EX["Imm"]))
+            self.nextState.IF["PC"] = self.state.IF["PC"] + bin_to_int(self.state.EX["Imm"])
             print("j type next pc:", self.nextState.IF["PC"])
         else:
-            # PC + 1 for all instructions except branches
-            self.nextState.IF["PC"] = self.state.IF["PC"] + 4
+            self.nextState.IF["PC"] += 4
 
         # ! set state for next action
 
-        # Assuming alu_result has already been computed in the execution stage
+        # Define instruction settings
+        instruction_settings = {
+            "LW": {"rd_mem": 1, "wrt_mem": 0, "wrt_enable": 1, "Wrt_reg_addr": self.state.EX["Wrt_reg_addr"]},
+            "I_generic": {"rd_mem": 0, "wrt_mem": 0, "wrt_enable": 1, "Wrt_reg_addr": self.state.EX["Wrt_reg_addr"]},
+            "S": {"rd_mem": 0, "wrt_mem": 1, "wrt_enable": 0},
+            "R": {"rd_mem": 0, "wrt_mem": 0, "wrt_enable": 1, "Wrt_reg_addr": self.state.EX["Wrt_reg_addr"]},
+            "B": {"rd_mem": 0, "wrt_mem": 0, "wrt_enable": 0},
+            "J": {"rd_mem": 0, "wrt_mem": 0, "wrt_enable": 1, "Wrt_reg_addr": self.state.EX["Wrt_reg_addr"]},
+        }
+
+        # Apply settings based on instruction type and opcode
+        if decodeResult["type"] == "I" and decodeResult["opcode"] == "0000011":  # LW instruction
+            settings = instruction_settings["LW"]
+        elif decodeResult["type"] == "I":
+            settings = instruction_settings["I_generic"]
+        else:
+            settings = instruction_settings.get(decodeResult["type"], {})
+
+        self.state.MEM.update(settings)
+
+        # Handle store data
+        if decodeResult["type"] == "S" and decodeResult["opcode"] == "0100011":
+            self.state.MEM["Store_data"] = self.myRF.readRF(decodeResult["rs2"])
+            print("store data:", self.state.MEM["Store_data"])
+
+        # Always set these values
         self.state.MEM["ALUresult"] = alu_result
-
-        # Check for Load instructions (LW)
-        if decodeResult["type"] == "I" and decodeResult["opcode"] == "0000011":
-            # * For LW instructions, we need to read from memory
-            self.state.MEM["rd_mem"] = 1
-            self.state.MEM["wrt_mem"] = 0
-            self.state.MEM[
-                "wrt_enable"
-            ] = 1  # We will write to a register after reading from memory
-            self.state.MEM["Wrt_reg_addr"] = self.state.EX[
-                "Wrt_reg_addr"
-            ]  # The destination register
-
-        # Check for Store instructions (SW)
-        elif decodeResult["type"] == "S" and decodeResult["opcode"] == "0100011":
-            # * For SW instructions, we need to write to memory
-            rs2_index = decodeResult["rs2"]
-            store_data = self.myRF.readRF(rs2_index)
-            self.state.MEM["rd_mem"] = 0
-            self.state.MEM["wrt_mem"] = 1
-            self.state.MEM["Store_data"] = store_data  # Data to be stored
-            print("store data:", store_data)
-            self.state.MEM["wrt_enable"] = 0
-            # In the case of store, we don't write to the register file, so wrt_enable is False
-
-        # Check for R-type instructions (like ADD, SUB, etc.)
-        elif decodeResult["type"] == "R":
-            # For R-type instructions, no memory operation is needed
-            self.state.MEM["rd_mem"] = 0
-            self.state.MEM["wrt_mem"] = 0
-            self.state.MEM[
-                "wrt_enable"
-            ] = 1  # We will write the ALU result to a register
-            self.state.MEM["Wrt_reg_addr"] = self.state.EX[
-                "Wrt_reg_addr"
-            ]  # The destination register
-
-        # Check for I-type instructions that are not LW (like ADDI, ANDI, etc.)
-        elif decodeResult["type"] == "I" and decodeResult["opcode"] != "0000011":
-            # For these I-type instructions, no memory operation is needed
-            self.state.MEM["rd_mem"] = 0
-            self.state.MEM["wrt_mem"] = 0
-            self.state.MEM[
-                "wrt_enable"
-            ] = True  # We will write the ALU result to a register
-            self.state.MEM["Wrt_reg_addr"] = self.state.EX[
-                "Wrt_reg_addr"
-            ]  # The destination register
-
-        # Check for B-type instructions (Branches)
-        elif decodeResult["type"] == "B":
-            # For branch instructions, no memory operation is needed and no write to the register file
-            self.state.MEM["rd_mem"] = 0
-            self.state.MEM["wrt_mem"] = 0
-            self.state.MEM["wrt_enable"] = 0
-
-        # Check for J-type instructions (like JAL)
-        elif decodeResult["type"] == "J":
-            # For JAL instructions, no memory operation is needed
-            self.state.MEM["rd_mem"] = 0
-            self.state.MEM["wrt_mem"] = 0
-            self.state.MEM["wrt_enable"] = 1  # We will write the PC+4 to a register
-            self.state.MEM["Wrt_reg_addr"] = self.state.EX[
-                "Wrt_reg_addr"
-            ]  # The destination register
-
-        self.state.MEM["Rs"] = self.state.EX["Rs"]  # Source register 1
-        self.state.MEM["Rt"] = self.state.EX[
-            "Rt"
-        ]  # Source register 2 or destination for stores
+        self.state.MEM["Rs"] = self.state.EX["Rs"]
+        self.state.MEM["Rt"] = self.state.EX["Rt"]
 
         # * 4. Memory Access (MEM)
-        # ... if it's a load/store, access memory ...
-        self.state.MEM["nop"] = self.state.ID["nop"]
-        if self.state.MEM["nop"]:
-            pass
-
         # Load Instruction
-        elif self.state.MEM["rd_mem"]:
+        if self.state.MEM["rd_mem"]:
             # Calculate the memory address to read from
             mem_address = self.state.MEM["ALUresult"]
             # Access the memory and read the data
@@ -373,35 +226,21 @@ class SingleStageCore(Core):
         # True for load (rd_mem) instructions and any R-type or I-type instructions
         # For store instructions (wrt_mem), it should be False
         self.state.WB["wrt_enable"] = self.state.MEM["wrt_enable"]
-        self.state.WB["nop"] = self.state.ID["nop"]
 
         self.state.WB["Wrt_reg_addr"] = self.state.MEM["Wrt_reg_addr"]
         self.state.WB["Rs"] = self.state.MEM["Rs"]
         self.state.WB["Rt"] = self.state.MEM["Rt"]
 
         # * 5. Write Back (WB)
-        if self.state.WB["nop"] == True:
-            pass
-
-        elif self.state.WB["wrt_enable"]:
+        if self.state.WB["wrt_enable"]:
             data = self.state.WB["Wrt_data"]
             self.myRF.writeRF(self.state.WB["Wrt_reg_addr"], data)
-
         else:
             pass
 
-        if self.state.IF["nop"]:
-            self.nextState.IF["nop"] = self.state.IF["nop"]
-            self.halted = True
-
         self.myRF.outputRF(self.cycle)  # dump RF
-        self.printState(
-            self.nextState, self.cycle
-        )  # print states after executing cycle 0, cycle 1, cycle 2 ...
-        self.writePerformanceMetrics(self.cycle)
-        self.state = (
-            self.nextState
-        )  # The end of the cycle and updates the current state with the values calculated in this cycle
+        self.printState(self.nextState, self.cycle)  # print states after executing cycle 0, cycle 1, cycle 2 ...
+        self.state = self.nextState  # The end of the cycle and updates the current state with the values calculated in this cycle
         self.cycle += 1
 
     def printState(self, state, cycle):
@@ -418,29 +257,6 @@ class SingleStageCore(Core):
             perm = "a"
         with open(self.opFilePath, perm) as wf:
             wf.writelines(printstate)
-
-    def writePerformanceMetrics(self, cycle):
-        # Assuming one instruction per cycle
-        total_instructions = cycle
-        average_cpi = 1  # For single-cycle CPU, CPI is always 1
-        ipc = 1 / average_cpi  # Inverse of CPI, also 1 for single-cycle CPU
-
-        # Create a list of strings to write to the file
-        performance_metrics = [
-            f"Total Execution Cycles: {cycle}\n",
-            f"Total Instructions Executed: {total_instructions}\n",
-            f"Average CPI: {average_cpi}\n",
-            f"Instructions Per Cycle (IPC): {ipc}\n",
-        ]
-
-        # File path for performance metrics
-        # Assuming self.ioDir is an additional directory name or a prefix/suffix for the filename
-        print(self.ioDir)
-        performance_metrics_file_path = os.path.join( self.ioDir, "output_yz8751", "PerformanceMetrics_Result.txt")
-
-        print(performance_metrics_file_path)
-        with open(performance_metrics_file_path, "a") as pf:
-            pf.writelines(performance_metrics)
 
 
 class FiveStageCore(Core):
@@ -461,23 +277,13 @@ class FiveStageCore(Core):
         # --------------------- IF stage ---------------------
 
         self.halted = True
-        if (
-            self.state.IF["nop"]
-            and self.state.ID["nop"]
-            and self.state.EX["nop"]
-            and self.state.MEM["nop"]
-            and self.state.WB["nop"]
-        ):
+        if self.state.IF["nop"] and self.state.ID["nop"] and self.state.EX["nop"] and self.state.MEM["nop"] and self.state.WB["nop"]:
             self.halted = True
 
         self.myRF.outputRF(self.cycle)  # dump RF
-        self.printState(
-            self.nextState, self.cycle
-        )  # print states after executing cycle 0, cycle 1, cycle 2 ...
+        self.printState(self.nextState, self.cycle)  # print states after executing cycle 0, cycle 1, cycle 2 ...
 
-        self.state = (
-            self.nextState
-        )  # The end of the cycle and updates the current state with the values calculated in this cycle
+        self.state = self.nextState  # The end of the cycle and updates the current state with the values calculated in this cycle
         self.cycle += 1
 
     def printState(self, state, cycle):
@@ -485,21 +291,11 @@ class FiveStageCore(Core):
             "-" * 70 + "\n",
             "State after executing cycle: " + str(cycle) + "\n",
         ]
-        printstate.extend(
-            ["IF." + key + ": " + str(val) + "\n" for key, val in state.IF.items()]
-        )
-        printstate.extend(
-            ["ID." + key + ": " + str(val) + "\n" for key, val in state.ID.items()]
-        )
-        printstate.extend(
-            ["EX." + key + ": " + str(val) + "\n" for key, val in state.EX.items()]
-        )
-        printstate.extend(
-            ["MEM." + key + ": " + str(val) + "\n" for key, val in state.MEM.items()]
-        )
-        printstate.extend(
-            ["WB." + key + ": " + str(val) + "\n" for key, val in state.WB.items()]
-        )
+        printstate.extend(["IF." + key + ": " + str(val) + "\n" for key, val in state.IF.items()])
+        printstate.extend(["ID." + key + ": " + str(val) + "\n" for key, val in state.ID.items()])
+        printstate.extend(["EX." + key + ": " + str(val) + "\n" for key, val in state.EX.items()])
+        printstate.extend(["MEM." + key + ": " + str(val) + "\n" for key, val in state.MEM.items()])
+        printstate.extend(["WB." + key + ": " + str(val) + "\n" for key, val in state.WB.items()])
 
         if cycle == 0:
             perm = "w"
@@ -512,9 +308,7 @@ class FiveStageCore(Core):
 if __name__ == "__main__":
     # parse arguments for input file location
     parser = argparse.ArgumentParser(description="RV32I processor")
-    parser.add_argument(
-        "--iodir", default="", type=str, help="Directory containing the input files."
-    )
+    parser.add_argument("--iodir", default="", type=str, help="Directory containing the input files.")
     args = parser.parse_args()
 
     ioDir = os.path.abspath(args.iodir)
@@ -547,3 +341,16 @@ if __name__ == "__main__":
     # dump SS and FS data mem.
     dmem_ss.outputDataMem()
     dmem_fs.outputDataMem()
+
+    with open(os.path.join(ioDir, "output_yz8751", "PerformanceMetrics_Result.txt"), "w") as f:
+        print("write performance metrics to", f.name)
+        f.write(f"IO Directory: {f.name}\n")
+        f.write(f"Single Stage Core Performance Metrics-----------------------------\n")
+        f.write(f"Number of cycles taken: {ssCore.cycle}\n")
+        f.write(f"Cycles per instruction: {round(ssCore.cycle / len(ssCore.Instrs), 5)}\n")
+        f.write(f"Instructions per cycle: {round( len(ssCore.Instrs) / ssCore.cycle, 6)}\n")
+
+        f.write(f"Five Stage Core Performance Metrics-----------------------------\n")
+        # f.write(f'Number of cycles taken: {fsCore.cycle}\n')
+        # f.write(f'Cycles per instruction: {round(fsCore.cycle/len(fsCore.Instrs) ,5)}\n' )
+        # f.write(f'Instructions per cycle: {round(len(fsCore.Instrs)/fsCore.cycle , 6)}\n')
