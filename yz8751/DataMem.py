@@ -3,7 +3,7 @@ class DataMem(object):
     def __init__(self, name, ioDir):
         self.id = name
         self.ioDir = ioDir
-        with open(ioDir + "/input/testcase3/dmem.txt") as dm:
+        with open(os.path.join(ioDir, 'dmem.txt')) as dm:
             self.DMem = [data.replace("\n", "") for data in dm.readlines()]
 
     def readInstr(self, ReadAddress):
@@ -33,7 +33,13 @@ class DataMem(object):
             self.DMem[Address + i] = WriteData[i*8:(i+1)*8]
         # write data into byte addressable memory
 
-    def outputDataMem(self):
-        resPath = os.path.join('output_yz8751',  self.id + "_DMEMResult.txt")
-        with open(resPath, "w") as rp:
+    def outputDataMem(self, testcase):
+        output_dir = os.path.join(self.ioDir, '..', "..", 'output_yz8751', testcase)
+        
+        # Check if the directory exists, and if not, create it
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        
+        res_file_path = os.path.join(output_dir, self.id + "_DMEMResult.txt")
+        with open(res_file_path, "w") as rp:
             rp.writelines([str(data) + "\n" for data in self.DMem])

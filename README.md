@@ -1,5 +1,12 @@
 # CSA_Project
 
+```python
+Author_name = "Yunze Zhao"
+NYU_netid = "yz8751"
+Class_name = "CSA"
+```
+--- 
+
 This repository contains the implementation of a single-stage instruction cycle simulator and a five-stage instruction cycle simulater for educational purposes for **CSA** class at NYU. The simulator is designed to model the behavior of a simplified CPU as it processes instructions.
 
 ## Single-Stage Simulator:
@@ -21,5 +28,9 @@ The `MEM` stage contains a `wrt_enable` flag, which is wholly inherited by the `
 ### Decoder:
 
 The decoder is a vital part of the simulator that interprets hexadecimal instructions and outputs a 32-bit binary representation. This binary is further dissected into its constituent parts for processing.
+
+### AlU and ALU_control:
+
+the alu control decode the alu operation code into specific action while alu perform them.
 
 

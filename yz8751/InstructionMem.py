@@ -1,8 +1,10 @@
+import os
+
 class InsMem(object):
     def __init__(self, name, ioDir):
         self.id = name
 
-        with open(ioDir + "/input/testcase3/imem.txt") as im:
+        with open(os.path.join(ioDir, 'imem.txt')) as im:
             self.IMem = [data.replace("\n", "") for data in im.readlines()]
 
     def readInstr(self, ReadAddress):

@@ -1,9 +1,10 @@
 import os
 
 class RegisterFile(object):
-    def __init__(self, ioDir, prefix):
-        print( os.path.join(ioDir, "output_yz8751", "RFResult.txt"))
-        self.outputFile = os.path.join(ioDir, "output_yz8751", prefix + "RFResult.txt")
+    def __init__(self, ioDir, prefix, testcase):
+        print("RegisterFile init", ioDir)
+        self.outputFileLoc = os.path.join(ioDir, '..', "output_yz8751", testcase)
+        self.outputFileName =  prefix + "RFResult.txt"
         self.Registers = [0x0 for i in range(32)]
 
     def readRF(self, Reg_addr):
@@ -17,11 +18,14 @@ class RegisterFile(object):
         self.Registers[decimal] = Wrt_reg_data
 
     def outputRF(self, cycle):
+        print("outputRF Location", self.outputFileLoc)
+        if not os.path.exists( self.outputFileLoc):
+            os.makedirs(self.outputFileLoc)
         op = ["-" * 70 + "\n", "State of RF after executing cycle:" + str(cycle) + "\n"]
         op.extend([str(val) + "\n" for val in self.Registers])
         if cycle == 0:
             perm = "w"
         else:
             perm = "a"
-        with open(self.outputFile, perm) as file:
+        with open(os.path.join( self.outputFileLoc, self.outputFileName), perm) as file:
             file.writelines(op)
