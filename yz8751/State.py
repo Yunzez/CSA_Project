@@ -15,6 +15,8 @@ class State(object):
             "wrt_mem": 0,  # write to memory
             "alu_op": 0,
             "wrt_enable": 0,  # write to register
+            "is_load": 0,
+            "alu_control": "0000",
         }
         self.MEM = {
             "nop": False,

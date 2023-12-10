@@ -18,7 +18,7 @@ class RegisterFile(object):
         self.Registers[decimal] = Wrt_reg_data
 
     def outputRF(self, cycle):
-        print("outputRF Location", self.outputFileLoc)
+        # print("outputRF Location", self.outputFileLoc)
         if not os.path.exists( self.outputFileLoc):
             os.makedirs(self.outputFileLoc)
         op = ["-" * 70 + "\n", "State of RF after executing cycle:" + str(cycle) + "\n"]
