@@ -137,7 +137,7 @@ State of RF after executing cycle:3
 ----------------------------------------------------------------------
 State of RF after executing cycle:4
 0
-1431655765
+2
 0
 0
 0
@@ -171,8 +171,8 @@ State of RF after executing cycle:4
 ----------------------------------------------------------------------
 State of RF after executing cycle:5
 0
-1431655765
-858993459
+2
+3
 0
 0
 0
@@ -205,9 +205,9 @@ State of RF after executing cycle:5
 ----------------------------------------------------------------------
 State of RF after executing cycle:6
 0
-1431655765
-858993459
-1431655765
+2
+3
+5
 0
 0
 0
@@ -239,9 +239,9 @@ State of RF after executing cycle:6
 ----------------------------------------------------------------------
 State of RF after executing cycle:7
 0
-1431655765
-858993459
-1431655765
+2
+3
+5
 0
 0
 0
@@ -273,9 +273,9 @@ State of RF after executing cycle:7
 ----------------------------------------------------------------------
 State of RF after executing cycle:8
 0
-1431655765
-858993459
-1431655765
+2
+3
+5
 0
 0
 0

@@ -1,0 +1,4 @@
+LW R2, R0, #4 // 3 
+ADD R3, R1, R2
+SW R3, R0, #8
+HALT

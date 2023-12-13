@@ -114,7 +114,7 @@ ID.nop: False
 ID.Instr: 00302423
 ID.PC: 16
 EX.nop: False
-EX.Read_data1: 0
+EX.Read_data1: 2
 EX.Read_data2: 0
 EX.Imm: 0
 EX.Rs: 00001
@@ -137,7 +137,7 @@ MEM.rd_mem: 1
 MEM.wrt_mem: 0
 MEM.wrt_enable: 1
 WB.nop: False
-WB.Wrt_data: 1
+WB.Wrt_data: 2
 WB.Rs: 00000
 WB.Rt: 0
 WB.Wrt_reg_addr: 00001
@@ -164,7 +164,7 @@ EX.wrt_enable: 0
 EX.is_load: 0
 EX.alu_control: 0010
 MEM.nop: False
-MEM.ALUresult: 0
+MEM.ALUresult: 5
 MEM.Store_data: 0
 MEM.Rs: 00001
 MEM.Rt: 00010
@@ -173,7 +173,7 @@ MEM.rd_mem: 0
 MEM.wrt_mem: 0
 MEM.wrt_enable: 1
 WB.nop: False
-WB.Wrt_data: 2
+WB.Wrt_data: 3
 WB.Rs: 00000
 WB.Rt: 0
 WB.Wrt_reg_addr: 00010
@@ -208,7 +208,7 @@ MEM.rd_mem: 0
 MEM.wrt_mem: 1
 MEM.wrt_enable: 0
 WB.nop: False
-WB.Wrt_data: 0
+WB.Wrt_data: 5
 WB.Rs: 00001
 WB.Rt: 00010
 WB.Wrt_reg_addr: 00011

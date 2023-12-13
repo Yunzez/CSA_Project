@@ -9,9 +9,27 @@ from DataMem import DataMem
 from RegisterFile import RegisterFile
 from ALU_Control import ALU_control
 from BranchControlUnit import BranchControlUnit
+from ForwardingUnit import ForwardingUnit
 
 MemSize = 1000  # memory size, in reality, the memory size should be 2^32, but for this lab, for the space resaon, we keep it as this large number, but the memory is still 32-bit addressable.
 
+class ExtoIDForwardRegister:
+    def __init__(self):
+        self.forward_data = None
+
+    def set_forward_data(self, reg_addr, value):
+        self.forward_data = {"reg_addr": reg_addr, "value": value}
+
+    def get_forward_data(self, reg_addr):
+        if self.forward_data and self.forward_data["reg_addr"] == reg_addr:
+            return self.forward_data["value"]
+        return None
+
+    def clear(self):
+        self.forward_data = None
+
+    def toString(self):
+        return str(self.forward_data)
 
 def bin_to_int(value):
     if isinstance(value, int):
@@ -253,9 +271,26 @@ class FiveStageCore(Core):
         self.alu_control = ALU_control()
         self.decoder = Decoder()
         self.branchControlUnit = BranchControlUnit()
+        self.forwardingUnit = ForwardingUnit()
 
         # ! signals for handling data hazards:
+        self.alu_result = None
         self.branch_taken = False
+        self.load_registers = {}
+
+        def is_waiting_for_load(register):
+            print("checking if register is waiting for load:", register, self.load_registers)
+            return self.load_registers.get(register, False)
+
+        def update_load_registers(self, instruction, is_start=True):
+            if instruction and instruction["type"] == "I" and "rd" in instruction:
+                self.load_registers[instruction["rd"]] = is_start
+    
+        self.is_waiting_for_load = is_waiting_for_load
+        self.update_load_registers = update_load_registers
+        self.stalled = False
+        self.forwarded = False
+        self.ex_to_id_forward_register = ExtoIDForwardRegister()
 
         # * initial all stage to be NOP (no operation)
         self.state.ID["nop"] = True
@@ -264,35 +299,57 @@ class FiveStageCore(Core):
         self.state.WB["nop"] = True
 
         self.halt_prep = False
+
     def step(self):
-        self.halted = False
+        self.halted = False # * reset halt signal
+        self.forwarded = False # * reset forwarded signal
+
         self.nextState = State()
+        mem_to_id_forwarding = None
         print("   ")
-        print("============ start of one cycle ==================" + " cycle:", self.cycle, "\n" )
+        print("============ start of one cycle ==================" + " cycle:", self.cycle, "\n")
+        print("load registers", self.load_registers)
+        print("Stalled: ", self.stalled)
+       
         # Your implementation
         # ! --------------------- WB stage ---------------------
         print("!----- WB -----!")
+        print("WB state:", self.state.WB)
+
         print("WB stage :", self.state.WB["nop"])
         if self.state.WB["nop"] != True:
             if self.state.WB["wrt_enable"]:
                 data = self.state.WB["Wrt_data"]
                 self.myRF.writeRF(self.state.WB["Wrt_reg_addr"], data)
                 print("write back:", data, "to register:", self.state.WB["Wrt_reg_addr"])
+               
+                # Check if this was a load instruction completing its operation
+                print("cancel load register for:", self.state.WB["Wrt_reg_addr"])
+                if self.load_registers.get(self.state.WB["Wrt_reg_addr"], False):
+                    # Mark the load operation as completed for this register
+                    self.load_registers[self.state.WB["Wrt_reg_addr"]] = False
             else:
                 pass
 
         # ! --------------------- MEM stage --------------------
+
+        fwType = None
         print("!----- MEM -----!")
+        print("MEM state:", self.state.MEM)
         if self.state.MEM["nop"] != True:
-            # Load Instruction
+
+            # * Load Instruction
             if self.state.MEM["rd_mem"]:
+
                 # Calculate the memory address to read from
                 mem_address = self.state.MEM["ALUresult"]
                 # Access the memory and read the data
                 read_data = self.ext_dmem.readInstr(mem_address)
                 # Save the read data for the Write Back (WB) stage
                 print("load type instruction, read memory from", mem_address)
+                fwType = 'wrt'
                 self.nextState.WB["Wrt_data"] = read_data
+
 
             # * Store Instruction
             # * store will not need to write back
@@ -310,9 +367,10 @@ class FiveStageCore(Core):
                 )
                 # Write the data to memory
                 self.ext_dmem.writeDataMem(int(mem_address, 2), store_data)
-
+                fwType = 'str'
             else:
                 self.nextState.WB["Wrt_data"] = self.state.MEM["ALUresult"]
+                fwType = 'alu'
 
             # * update general state for next action
             # True for load (rd_mem) instructions and any R-type or I-type instructions
@@ -324,16 +382,32 @@ class FiveStageCore(Core):
 
         # ! --------------------- EX stage ---------------------
         print("!----- EX -----!")
+        print("EX state: ", self.state.EX)
         if self.state.EX["nop"] != True:
-            alu_control_input = self.nextState.EX["alu_control"]
-            print("alu operation:", alu_control_input, "add imm ?", self.state.EX["is_I_type"])
+            
+            # * forwarding MEM to EX ----
+            if not self.stalled: # * here we need to wait for the stall to be resolved, or we will be fowarding to the wrong cycle
+                mem_to_id_forwarding = self.forwardingUnit.check_mem_id_forwarding(self.state.EX, self.state.MEM, self.nextState.WB, fwType)
+                print("forwarding from MEM to EX:", mem_to_id_forwarding)
+                if mem_to_id_forwarding:
+                    self.state.EX.update(mem_to_id_forwarding)
+                    self.forwarded = True
+                    print("forwarding, cancel load register for:", self.state.WB["Wrt_reg_addr"])
+                    if fwType == 'wrt' and self.load_registers.get(self.state.MEM["Wrt_reg_addr"], False):
+                        # Mark the load operation as completed for this register
+                        self.load_registers[self.state.MEM["Wrt_reg_addr"]] = False
+            
+            # * alu operation
+            alu_control_input = self.state.EX["alu_control"]
+            print("alu operation:", alu_control_input, "add imm (is I type) ?", self.state.EX["is_I_type"])
 
-            alu_result = None
+
             data1 = bin_to_int(self.state.EX["Read_data1"])
             data2 = bin_to_int(self.state.EX["Read_data2"] if not self.state.EX["is_I_type"] else self.state.EX["Imm"])
-            alu_result = self.alu.operate(alu_control_input, data1, data2)
+            print("data2: ", data2, ", ALU control: ", alu_control_input)
+            self.alu_result = self.alu.operate(alu_control_input, data1, data2)
 
-            print("alu result:", alu_result)
+            print("alu result:", self.alu_result)
 
             # * we handled branch in ID
 
@@ -351,8 +425,10 @@ class FiveStageCore(Core):
             settings = {}
             # Apply settings based on instruction type and opcode
             if self.state.EX["is_I_type"] and self.state.EX["is_load"]:  # LW instruction
+                print("lw instruction")
                 settings = instruction_settings["LW"]
-            elif self.state.EX["is_I_type"] and not self.state.EX["alu_op"] == "00": # avoid store 
+            elif self.state.EX["is_I_type"] and not self.state.EX["alu_op"] == "00":  # avoid store
+                print("I type instruction, not S")
                 settings = instruction_settings["I_generic"]
             else:
                 if self.state.EX["alu_op"] == "00":
@@ -367,23 +443,77 @@ class FiveStageCore(Core):
 
             print("settings:", settings)
             self.nextState.MEM.update(settings)
+            print("next state mem:", self.nextState.MEM)
 
-            # * Handle store data
-            if self.state.EX["is_I_type"] and self.state.EX["alu_op"] == "00":  # store instruction
-                self.nextState.MEM["Store_data"] = self.myRF.readRF(self.state.EX["Rt"])
-                print("store data in next stage:", self.nextState.MEM["Store_data"])
+            # # * Handle store data
+            # if self.state.EX["is_I_type"] and self.state.EX["alu_op"] == "00":  # store instruction
+            #     store_data = None
+            #     if "Read_data2" in mem_to_id_forwarding:  # Check if data is forwarded
+            #         store_data = mem_to_id_forwarding["Read_data2"]
+            #     else:
+            #         store_data = self.myRF.readRF(self.state.EX["Rt"])  # Read from register file
+
+            #     self.nextState.MEM["Store_data"] = store_data
+            #     print("store data in next stage:", self.nextState.MEM["Store_data"])
 
             # Always set these values
-            self.nextState.MEM["ALUresult"] = alu_result
+            self.nextState.MEM["ALUresult"] = self.alu_result
             self.nextState.MEM["Rs"] = self.state.EX["Rs"]
             self.nextState.MEM["Rt"] = self.state.EX["Rt"]
 
+
+            # * EX to ID forwarding ----
+            if not self.nextState.MEM["wrt_enable"]:
+                self.ex_to_id_forward_register.set_forward_data(self.state.EX["Wrt_reg_addr"], self.alu_result)
+                print("check ex to id forwarding:", self.ex_to_id_forward_register.toString())
+
+
         # ! --------------------- ID stage ---------------------
         print("!----- ID -----!")
+        print("ID state:", self.state.ID)
+
         if self.state.ID["nop"] != True and self.state.ID["Instr"] != None:
+            
             print("ID stage instruction:", self.state.ID["Instr"])
             decodeResult = Decoder().decode(self.state.ID["Instr"])
             print("decode result:", decodeResult)
+
+            # * forwarding MEM to ID ----
+            if not self.stalled: # * here we need to wait for the stall to be resolved, or we will be fowarding to the wrong cycle
+                mem_to_id_forwarding = self.forwardingUnit.check_mem_id_forwarding(decodeResult, self.state.MEM, self.nextState.WB, fwType)
+                print("forwarding from MEM to ID:", mem_to_id_forwarding)
+                if mem_to_id_forwarding:
+                    self.state.EX.update(mem_to_id_forwarding)
+                    self.forwarded = True
+                    print("forwarding, cancel load register for:", self.state.WB["Wrt_reg_addr"])
+                    if fwType == 'wrt' and self.load_registers.get(self.state.MEM["Wrt_reg_addr"], False):
+                        # Mark the load operation as completed for this register
+                        self.load_registers[self.state.MEM["Wrt_reg_addr"]] = False
+          
+            # ! ----- detect_load_use_hazard -----
+            if self.stalled:
+                self.stalled = False
+             # Get the current instruction in the ID stage
+            current_id_instr = self.state.ID["Instr"]
+            decode_result = self.decoder.decode(current_id_instr)
+
+            # Check if the current instruction is dependent on a preceding LW instruction
+            if decode_result["type"] not in ["NOP", "HALT"]:
+                rs1 = decode_result.get("rs1")
+                rs2 = decode_result.get("rs2")
+
+
+                if decodeResult["type"] == "I":  # Assuming LW opcode is "0000011"
+                    print("lw instruction, add to load registers")
+                    self.load_registers[decodeResult["rd"]] = True
+
+                # Check if rs1 or rs2 are waiting for data from a LW instruction
+                if not self.forwarded and (self.is_waiting_for_load(rs1) or self.is_waiting_for_load(rs2)):
+                    print("ID stage stalled due to load-use hazard")
+                    self.stalled = True
+                    # return 
+            
+
             # halt on halt instruction
             if decodeResult["type"] == "HALT":
                 print("halted")
@@ -393,7 +523,6 @@ class FiveStageCore(Core):
                 self.nextState.EX["nop"] = True
                 # * we set EX to nop because next cycle EX will run
                 self.halt_prep = True
-
 
             # Set ALU operation based on type
             alu_ops = {"R": "10", "I": "11", "S": "00", "B": "01", "J": "11"}
@@ -454,19 +583,51 @@ class FiveStageCore(Core):
                 self.nextState.EX["Read_data2"] = 4
                 print("j type data:", self.state.EX["Read_data1"], self.state.EX["Read_data2"])
 
-            self.nextState.EX["alu_control"] = self.alu_control.get_control_bits(
-                decodeResult["type"], alu_ops.get(decodeResult["type"], ""), decodeResult["funct3"] if "funct3" in decodeResult else None, decodeResult["funct7"] if "funct7" in decodeResult else None
+            alu_control_input = self.alu_control.get_control_bits(
+                decodeResult["type"], self.nextState.EX["alu_op"], decodeResult["funct3"] if "funct3" in decodeResult else None, decodeResult["funct7"] if "funct7" in decodeResult else None
             )
+
+            self.nextState.EX["alu_control"] = alu_control_input
+            print("alu operation:", alu_control_input, "add imm ?", self.nextState.EX["is_I_type"])
+
+
+            # * get data for EX to ID forwarding
+            forwarded_data1 = self.ex_to_id_forward_register.get_forward_data(decodeResult.get("rs1"))
+            forwarded_data2 = self.ex_to_id_forward_register.get_forward_data(decodeResult.get("rs2"))
+            print("forwarded data:", forwarded_data1, forwarded_data2)
+
+            # Update Read_data1 and Read_data2 with forwarded data if necessary
+            if forwarded_data1 is not None and "rs1" in decodeResult:
+                self.nextState.EX["Read_data1"] = forwarded_data1
+
+            if forwarded_data2 is not None and "rs2" in decodeResult:
+                self.nextState.EX["Read_data2"] = forwarded_data2
+
+
+            # * get data from MEM to ID forwarding
+            if mem_to_id_forwarding:
+                print("forwarding from MEM to ID:", mem_to_id_forwarding)
+                self.nextState.EX.update(mem_to_id_forwarding)
+
 
         # ! --------------------- IF stage ---------------------
         print("!----- IF -----!")
+        print("IF state:", self.state.IF)
         print("IF stage nop: ", self.state.IF["nop"])
-        if self.state.IF["nop"]:
+        if  self.stalled == True:
+            print("stalled, skip IF")
+            self.nextState.EX["nop"] = True
+            self.nextState.ID["nop"] = self.state.IF["nop"]
+            self.nextState.ID["Instr"] = self.state.ID["Instr"]
+            self.nextState.IF["PC"] = self.state.IF["PC"]
+
+        elif self.state.IF["nop"]:
             self.nextState.WB["nop"] = self.state.MEM["nop"]
             self.nextState.MEM["nop"] = self.state.EX["nop"]
             self.nextState.EX["nop"] = self.state.ID["nop"]
             self.nextState.ID["nop"] = self.state.IF["nop"]
             self.nextState.IF["nop"] = True
+
         elif self.halt_prep == False:
             current_instruction = self.ext_imem.readInstr(self.state.IF["PC"])
             print("IF stage instruction:", current_instruction)
@@ -492,6 +653,9 @@ class FiveStageCore(Core):
         if self.state.IF["nop"] and self.state.ID["nop"] and self.state.EX["nop"] and self.state.MEM["nop"] and self.state.WB["nop"]:
             self.halted = True
 
+        
+
+        # ! ending of one cycle
         self.myRF.outputRF(self.cycle)  # dump RF
         self.printState(self.nextState, self.cycle)  # print states after executing cycle 0, cycle 1, cycle 2 ...
 
@@ -588,3 +752,5 @@ if __name__ == "__main__":
         f.write(f"Number of cycles taken: {fsCore.cycle}\n")
         # f.write(f"Cycles per instruction: {round(fsCore.cycle/len(fsCore.Instrs) ,5)}\n")
         # f.write(f"Instructions per cycle: {round(len(fsCore.Instrs)/fsCore.cycle , 6)}\n")
+
+

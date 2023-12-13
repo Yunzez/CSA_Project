@@ -172,7 +172,7 @@ State of RF after executing cycle:4
 State of RF after executing cycle:5
 0
 1
-1
+2
 0
 0
 0
@@ -206,7 +206,7 @@ State of RF after executing cycle:5
 State of RF after executing cycle:6
 0
 1
-1
+2
 0
 0
 0
@@ -240,7 +240,41 @@ State of RF after executing cycle:6
 State of RF after executing cycle:7
 0
 1
+2
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+----------------------------------------------------------------------
+State of RF after executing cycle:8
+0
 1
+2
 0
 0
 0
