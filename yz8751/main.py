@@ -276,6 +276,7 @@ class FiveStageCore(Core):
         # ! signals for handling data hazards:
         self.alu_result = None
         self.branch_taken = False
+        self.nop = False
         self.load_registers = {}
 
         def is_waiting_for_load(register):
@@ -290,6 +291,8 @@ class FiveStageCore(Core):
         self.update_load_registers = update_load_registers
         self.stalled = False
         self.forwarded = False
+
+        # we use a register to handl ex to id forward
         self.ex_to_id_forward_register = ExtoIDForwardRegister()
 
         # * initial all stage to be NOP (no operation)
@@ -303,9 +306,12 @@ class FiveStageCore(Core):
     def step(self):
         self.halted = False # * reset halt signal
         self.forwarded = False # * reset forwarded signal
-
+        self.nop = False
         self.nextState = State()
+
+        # we use two forwarding signals to handle forwarding from MEM to EX and MEM to ID
         mem_to_id_forwarding = None
+        mem_to_ex_forwarding = None
         print("   ")
         print("============ start of one cycle ==================" + " cycle:", self.cycle, "\n")
         print("load registers", self.load_registers)
@@ -384,13 +390,13 @@ class FiveStageCore(Core):
         print("!----- EX -----!")
         print("EX state: ", self.state.EX)
         if self.state.EX["nop"] != True:
-            
+
             # * forwarding MEM to EX ----
             if not self.stalled: # * here we need to wait for the stall to be resolved, or we will be fowarding to the wrong cycle
-                mem_to_id_forwarding = self.forwardingUnit.check_mem_id_forwarding(self.state.EX, self.state.MEM, self.nextState.WB, fwType)
-                print("forwarding from MEM to EX:", mem_to_id_forwarding)
-                if mem_to_id_forwarding:
-                    self.state.EX.update(mem_to_id_forwarding)
+                mem_to_ex_forwarding = self.forwardingUnit.check_mem_id_forwarding(self.state.EX, self.state.MEM, self.nextState.WB, fwType)
+                print("forwarding from MEM to EX:", mem_to_ex_forwarding)
+                if mem_to_ex_forwarding:
+                    self.state.EX.update(mem_to_ex_forwarding)
                     self.forwarded = True
                     print("forwarding, cancel load register for:", self.state.WB["Wrt_reg_addr"])
                     if fwType == 'wrt' and self.load_registers.get(self.state.MEM["Wrt_reg_addr"], False):
@@ -445,16 +451,17 @@ class FiveStageCore(Core):
             self.nextState.MEM.update(settings)
             print("next state mem:", self.nextState.MEM)
 
-            # # * Handle store data
-            # if self.state.EX["is_I_type"] and self.state.EX["alu_op"] == "00":  # store instruction
-            #     store_data = None
-            #     if "Read_data2" in mem_to_id_forwarding:  # Check if data is forwarded
-            #         store_data = mem_to_id_forwarding["Read_data2"]
-            #     else:
-            #         store_data = self.myRF.readRF(self.state.EX["Rt"])  # Read from register file
+            # ! Handle only store data, get data from forwarding earlier in EX stage
+            if self.state.EX["is_I_type"] and self.state.EX["alu_op"] == "00":  # store instruction
+                store_data = None
+                if "Read_data2" in mem_to_ex_forwarding:  # Check if data is forwarded
+                    store_data = mem_to_ex_forwarding["Read_data2"]
+                else:
+                    store_data = self.myRF.readRF(self.state.EX["Rt"])  # Read from register file
 
-            #     self.nextState.MEM["Store_data"] = store_data
-            #     print("store data in next stage:", self.nextState.MEM["Store_data"])
+                self.nextState.MEM["Store_data"] = store_data
+                print("hanld mem to ex forward", mem_to_ex_forwarding)
+                print("store data in next stage:", self.nextState.MEM["Store_data"])
 
             # Always set these values
             self.nextState.MEM["ALUresult"] = self.alu_result
@@ -484,7 +491,7 @@ class FiveStageCore(Core):
                 print("forwarding from MEM to ID:", mem_to_id_forwarding)
                 if mem_to_id_forwarding:
                     self.state.EX.update(mem_to_id_forwarding)
-                    self.forwarded = True
+                    # self.forwarded = True
                     print("forwarding, cancel load register for:", self.state.WB["Wrt_reg_addr"])
                     if fwType == 'wrt' and self.load_registers.get(self.state.MEM["Wrt_reg_addr"], False):
                         # Mark the load operation as completed for this register
@@ -502,27 +509,30 @@ class FiveStageCore(Core):
                 rs1 = decode_result.get("rs1")
                 rs2 = decode_result.get("rs2")
 
+                # Check if rs1 or rs2 are waiting for data from a LW instruction
+                if  (self.is_waiting_for_load(rs1) or self.is_waiting_for_load(rs2)):
+                    print("ID stage stalled due to load-use hazard")
+                    self.stalled = True
+                    # return 
 
                 if decodeResult["type"] == "I":  # Assuming LW opcode is "0000011"
                     print("lw instruction, add to load registers")
                     self.load_registers[decodeResult["rd"]] = True
 
-                # Check if rs1 or rs2 are waiting for data from a LW instruction
-                if not self.forwarded and (self.is_waiting_for_load(rs1) or self.is_waiting_for_load(rs2)):
-                    print("ID stage stalled due to load-use hazard")
-                    self.stalled = True
-                    # return 
             
 
             # halt on halt instruction
             if decodeResult["type"] == "HALT":
                 print("halted")
-                # self.halted = True
                 self.nextState.IF["nop"] = True
                 self.nextState.ID["nop"] = True
                 self.nextState.EX["nop"] = True
                 # * we set EX to nop because next cycle EX will run
                 self.halt_prep = True
+
+            if decodeResult["type"] == "NOP":
+                print("nop")
+                self.nop = True
 
             # Set ALU operation based on type
             alu_ops = {"R": "10", "I": "11", "S": "00", "B": "01", "J": "11"}
@@ -551,31 +561,11 @@ class FiveStageCore(Core):
             if decodeResult["type"] == "R":
                 self.nextState.EX["Read_data2"] = self.myRF.readRF(decodeResult["rs2"])
 
-            if decodeResult["type"] == "B":
-                # ! handle branch in the BranchControlUnit
-                rs2 = self.myRF.readRF(decodeResult["rs2"])
-                self.nextState.EX["Read_data2"] = rs2
-
-                branch_taken, branch_target = self.branchControlUnit.evaluateBranch(decodeResult, rs1, rs2, self.state.ID["PC"], bin_to_int(imm))
-
-                if branch_taken:
-                    self.branch_taken = True
-                    # Update PC for branch or jump
-                    self.nextState.IF["PC"] = branch_target
-
-                    # Set NOP for subsequent stages
-                    self.nextState.EX["nop"] = True
-                    self.nextState.MEM["nop"] = True
-                    self.nextState.WB["nop"] = True
-                else:
-                    self.nextState.EX["nop"] = False
-                    self.nextState.MEM["nop"] = False
-                    self.nextState.WB["nop"] = False
-                    print("branch not taken")
-                    # Normal instruction, increment PC by 4, we already did this in the IF stage
-
             if decodeResult["type"] == "S":
                 self.nextState.EX["is_I_type"] = True  # ! we need this to be true so imm is used instead of Read_data2, I treat this as a use imm signal
+
+            if decodeResult["type"] == "B":
+                 self.nextState.EX["Read_data2"] = rs2
 
             if decodeResult["type"] == "J":
                 # this will be PC + 4
@@ -609,11 +599,51 @@ class FiveStageCore(Core):
                 print("forwarding from MEM to ID:", mem_to_id_forwarding)
                 self.nextState.EX.update(mem_to_id_forwarding)
 
+            # * we handle branch at last as we will need forwarding information 
+            if decodeResult["type"] == "B":
+                # ! handle branch in the BranchControlUnit
+                # * Ex to Id forwarding
+                if forwarded_data2 is not None :
+                    rs2 = forwarded_data2
+                else: 
+                    rs2 = self.myRF.readRF(decodeResult["rs2"])
+                
+                if forwarded_data1 is not None:
+                    rs1 = forwarded_data1
+                
+                # * MEM to Id forwarding
+                if mem_to_id_forwarding:
+                    if "Read_data2" in mem_to_id_forwarding:
+                        rs2 = mem_to_id_forwarding["Read_data2"]
+                    if "Read_data1" in mem_to_id_forwarding:
+                        rs1 = mem_to_id_forwarding["Read_data1"]
+                
+                branch_taken, branch_target = self.branchControlUnit.evaluateBranch(decodeResult, rs1, rs2, self.state.IF["PC"], bin_to_int(imm))
+
+                print("branch taken:", branch_taken, "branch target:", branch_target)
+                if branch_taken:
+                    self.branch_taken = True
+                    # Update PC for branch or jump
+                    self.nextState.IF["PC"] = branch_target
+
+                    # Set NOP for subsequent stages
+                    self.nextState.EX["nop"] = True
+                    self.nextState.MEM["nop"] = True
+                    self.nextState.WB["nop"] = True
+                else:
+                    if  decodeResult["type"] != "NOP":
+                        self.nextState.EX["nop"] = False  
+
+                    self.nextState.MEM["nop"] = False
+                    self.nextState.WB["nop"] = False
+                    print("branch not taken")
+                    # Normal instruction, increment PC by 4, we already did this in the IF stage
 
         # ! --------------------- IF stage ---------------------
         print("!----- IF -----!")
         print("IF state:", self.state.IF)
         print("IF stage nop: ", self.state.IF["nop"])
+
         if  self.stalled == True:
             print("stalled, skip IF")
             self.nextState.EX["nop"] = True
@@ -628,6 +658,13 @@ class FiveStageCore(Core):
             self.nextState.ID["nop"] = self.state.IF["nop"]
             self.nextState.IF["nop"] = True
 
+        # elif self.nop and not self.halt_prep:
+        #     print("nop in EX, trigger NOP cycle")
+        #     self.nextState.WB["nop"] = self.state.MEM["nop"]
+        #     self.nextState.MEM["nop"] = self.state.EX["nop"]
+        #     self.nextState.EX["nop"] = True
+        #     self.nextState.ID["nop"] = True
+
         elif self.halt_prep == False:
             current_instruction = self.ext_imem.readInstr(self.state.IF["PC"])
             print("IF stage instruction:", current_instruction)
@@ -641,6 +678,11 @@ class FiveStageCore(Core):
             self.nextState.ID["nop"] = self.state.IF["nop"]
             self.nextState.IF["nop"] = self.state.IF["nop"]
 
+            if self.nop:
+                print("nop in EX, trigger NOP cycle")
+                self.nextState.EX["nop"] = True
+
+            
             if current_instruction not in self.Instrs:
                 self.Instrs.append(current_instruction)
 
@@ -649,6 +691,9 @@ class FiveStageCore(Core):
                 self.state.IF["PC"],
                 current_instruction,
             )
+        
+       
+       
 
         if self.state.IF["nop"] and self.state.ID["nop"] and self.state.EX["nop"] and self.state.MEM["nop"] and self.state.WB["nop"]:
             self.halted = True
@@ -661,6 +706,10 @@ class FiveStageCore(Core):
 
         self.state = self.nextState  # The end of the cycle and updates the current state with the values calculated in this cycle
         self.cycle += 1
+
+        # # ! testing only
+        # if self.cycle > 10: 
+        #     self.halted = True
 
     def printState(self, state, cycle):
         printstate = [
@@ -679,6 +728,8 @@ class FiveStageCore(Core):
             perm = "a"
         with open(self.opFilePath, perm) as wf:
             wf.writelines(printstate)
+
+
 
 
 def is_valid_testcase(path):

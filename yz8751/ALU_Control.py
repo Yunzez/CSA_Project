@@ -26,7 +26,7 @@ class ALU_control:
             elif funct3 == "110":
                 alu_control_input = self.ALU_CONTROL_CODES["OR"]
             elif funct3 == "111":
-                alu_control_input = self.ALU_CONTROL_CODES["ADD"]
+                alu_control_input = self.ALU_CONTROL_CODES["AND"]
             else:
                 raise ValueError(f"Invalid funct3 value: {funct3}")
                 

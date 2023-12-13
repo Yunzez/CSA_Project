@@ -15,7 +15,8 @@ class BranchControlUnit:
 
     def evaluateBranchCondition(self, funct3, data1, data2, currentPC, imm):
         # BEQ and BNE conditions
-        if funct3 == "000" and data1 == data2:  # BEQ
+        print("funct3:", funct3, "data1:", data1, "data2:", data2, "imm:", imm)
+        if funct3 == "000" and data1 == data2:  # ! BEQ
             return True, currentPC + imm
         elif funct3 == "001" and data1 != data2:  # BNE
             return True, currentPC + imm
