@@ -454,7 +454,7 @@ class FiveStageCore(Core):
             # ! Handle only store data, get data from forwarding earlier in EX stage
             if self.state.EX["is_I_type"] and self.state.EX["alu_op"] == "00":  # store instruction
                 store_data = None
-                if "Read_data2" in mem_to_ex_forwarding:  # Check if data is forwarded
+                if mem_to_ex_forwarding and "Read_data2" in mem_to_ex_forwarding:  # Check if data is forwarded
                     store_data = mem_to_ex_forwarding["Read_data2"]
                 else:
                     store_data = self.myRF.readRF(self.state.EX["Rt"])  # Read from register file
@@ -571,7 +571,9 @@ class FiveStageCore(Core):
                 # this will be PC + 4
                 self.nextState.EX["Read_data1"] = self.state.IF["PC"]
                 self.nextState.EX["Read_data2"] = 4
-                print("j type data:", self.state.EX["Read_data1"], self.state.EX["Read_data2"])
+                print("j type data:", self.nextState.EX["Read_data1"], self.nextState.EX["Read_data2"])
+                print("jump to address:", self.state.IF["PC"], " + ", bin_to_int(imm))
+                self.state.IF["PC"] = self.state.IF["PC"] + bin_to_int(imm)
 
             alu_control_input = self.alu_control.get_control_bits(
                 decodeResult["type"], self.nextState.EX["alu_op"], decodeResult["funct3"] if "funct3" in decodeResult else None, decodeResult["funct7"] if "funct7" in decodeResult else None
@@ -600,7 +602,7 @@ class FiveStageCore(Core):
                 self.nextState.EX.update(mem_to_id_forwarding)
 
             # * we handle branch at last as we will need forwarding information 
-            if decodeResult["type"] == "B":
+            if decodeResult["type"] == "B" and not self.stalled:
                 # ! handle branch in the BranchControlUnit
                 # * Ex to Id forwarding
                 if forwarded_data2 is not None :
@@ -618,13 +620,13 @@ class FiveStageCore(Core):
                     if "Read_data1" in mem_to_id_forwarding:
                         rs1 = mem_to_id_forwarding["Read_data1"]
                 
-                branch_taken, branch_target = self.branchControlUnit.evaluateBranch(decodeResult, rs1, rs2, self.state.IF["PC"], bin_to_int(imm))
+                branch_taken, branch_target = self.branchControlUnit.evaluateBranch(decodeResult, rs1, rs2, self.state.IF["PC"] - 4, bin_to_int(imm))
 
                 print("branch taken:", branch_taken, "branch target:", branch_target)
                 if branch_taken:
                     self.branch_taken = True
                     # Update PC for branch or jump
-                    self.nextState.IF["PC"] = branch_target
+                    self.state.IF["PC"] = branch_target
 
                     # Set NOP for subsequent stages
                     self.nextState.EX["nop"] = True
@@ -657,13 +659,6 @@ class FiveStageCore(Core):
             self.nextState.EX["nop"] = self.state.ID["nop"]
             self.nextState.ID["nop"] = self.state.IF["nop"]
             self.nextState.IF["nop"] = True
-
-        # elif self.nop and not self.halt_prep:
-        #     print("nop in EX, trigger NOP cycle")
-        #     self.nextState.WB["nop"] = self.state.MEM["nop"]
-        #     self.nextState.MEM["nop"] = self.state.EX["nop"]
-        #     self.nextState.EX["nop"] = True
-        #     self.nextState.ID["nop"] = True
 
         elif self.halt_prep == False:
             current_instruction = self.ext_imem.readInstr(self.state.IF["PC"])

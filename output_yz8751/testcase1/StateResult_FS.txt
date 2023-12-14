@@ -109,11 +109,10 @@ WB.wrt_enable: 0
 ----------------------------------------------------------------------
 State after executing cycle: 3
 IF.nop: False
-IF.PC: 16
+IF.PC: 12
 ID.nop: False
-ID.Instr: 40208233
-ID.PC: 16
-EX.nop: False
+ID.Instr: 002081b3
+EX.nop: True
 EX.Read_data1: 5
 EX.Read_data2: 0
 EX.Imm: 0
@@ -145,6 +144,77 @@ WB.wrt_enable: 1
 ----------------------------------------------------------------------
 State after executing cycle: 4
 IF.nop: False
+IF.PC: 12
+ID.nop: False
+ID.Instr: 002081b3
+EX.nop: True
+EX.Read_data1: 5
+EX.Read_data2: 0
+EX.Imm: 0
+EX.Rs: 00001
+EX.Rt: 00010
+EX.Wrt_reg_addr: 00011
+EX.is_I_type: False
+EX.rd_mem: 0
+EX.wrt_mem: 0
+EX.alu_op: 10
+EX.wrt_enable: 0
+EX.is_load: 0
+EX.alu_control: 0010
+MEM.nop: False
+MEM.ALUresult: 0
+MEM.Store_data: 0
+MEM.Rs: 0
+MEM.Rt: 0
+MEM.Wrt_reg_addr: 0
+MEM.rd_mem: 0
+MEM.wrt_mem: 0
+MEM.wrt_enable: 0
+WB.nop: False
+WB.Wrt_data: 3
+WB.Rs: 00000
+WB.Rt: 0
+WB.Wrt_reg_addr: 00010
+WB.wrt_enable: 1
+----------------------------------------------------------------------
+State after executing cycle: 5
+IF.nop: False
+IF.PC: 16
+ID.nop: False
+ID.Instr: 40208233
+ID.PC: 16
+EX.nop: False
+EX.Read_data1: 5
+EX.Read_data2: 3
+EX.Imm: 0
+EX.Rs: 00001
+EX.Rt: 00010
+EX.Wrt_reg_addr: 00011
+EX.is_I_type: False
+EX.rd_mem: 0
+EX.wrt_mem: 0
+EX.alu_op: 10
+EX.wrt_enable: 0
+EX.is_load: 0
+EX.alu_control: 0010
+MEM.nop: False
+MEM.ALUresult: 0
+MEM.Store_data: 0
+MEM.Rs: 0
+MEM.Rt: 0
+MEM.Wrt_reg_addr: 0
+MEM.rd_mem: 0
+MEM.wrt_mem: 0
+MEM.wrt_enable: 0
+WB.nop: False
+WB.Wrt_data: 0
+WB.Rs: 0
+WB.Rt: 0
+WB.Wrt_reg_addr: 0
+WB.wrt_enable: 0
+----------------------------------------------------------------------
+State after executing cycle: 6
+IF.nop: False
 IF.PC: 20
 ID.nop: False
 ID.Instr: 00302423
@@ -173,13 +243,13 @@ MEM.rd_mem: 0
 MEM.wrt_mem: 0
 MEM.wrt_enable: 1
 WB.nop: False
-WB.Wrt_data: 3
-WB.Rs: 00000
+WB.Wrt_data: 0
+WB.Rs: 0
 WB.Rt: 0
-WB.Wrt_reg_addr: 00010
-WB.wrt_enable: 1
+WB.Wrt_reg_addr: 0
+WB.wrt_enable: 0
 ----------------------------------------------------------------------
-State after executing cycle: 5
+State after executing cycle: 7
 IF.nop: False
 IF.PC: 24
 ID.nop: False
@@ -215,7 +285,7 @@ WB.Rt: 00010
 WB.Wrt_reg_addr: 00011
 WB.wrt_enable: 1
 ----------------------------------------------------------------------
-State after executing cycle: 6
+State after executing cycle: 8
 IF.nop: False
 IF.PC: 28
 ID.nop: False
@@ -237,7 +307,7 @@ EX.is_load: 0
 EX.alu_control: 0010
 MEM.nop: False
 MEM.ALUresult: 8
-MEM.Store_data: 0
+MEM.Store_data: 8
 MEM.Rs: 00000
 MEM.Rt: 00011
 MEM.Wrt_reg_addr: 0
@@ -251,7 +321,7 @@ WB.Rt: 00010
 WB.Wrt_reg_addr: 00100
 WB.wrt_enable: 1
 ----------------------------------------------------------------------
-State after executing cycle: 7
+State after executing cycle: 9
 IF.nop: False
 IF.PC: 32
 ID.nop: False
@@ -270,10 +340,10 @@ EX.wrt_mem: 0
 EX.alu_op: 10
 EX.wrt_enable: 0
 EX.is_load: 0
-EX.alu_control: 0010
+EX.alu_control: 0000
 MEM.nop: False
 MEM.ALUresult: 12
-MEM.Store_data: 0
+MEM.Store_data: 2
 MEM.Rs: 00000
 MEM.Rt: 00100
 MEM.Wrt_reg_addr: 0
@@ -287,7 +357,7 @@ WB.Rt: 00011
 WB.Wrt_reg_addr: 0
 WB.wrt_enable: 0
 ----------------------------------------------------------------------
-State after executing cycle: 8
+State after executing cycle: 10
 IF.nop: False
 IF.PC: 36
 ID.nop: False
@@ -308,7 +378,7 @@ EX.wrt_enable: 0
 EX.is_load: 0
 EX.alu_control: 0001
 MEM.nop: False
-MEM.ALUresult: 8
+MEM.ALUresult: 1
 MEM.Store_data: 0
 MEM.Rs: 00010
 MEM.Rt: 00001
@@ -323,7 +393,7 @@ WB.Rt: 00100
 WB.Wrt_reg_addr: 0
 WB.wrt_enable: 0
 ----------------------------------------------------------------------
-State after executing cycle: 9
+State after executing cycle: 11
 IF.nop: False
 IF.PC: 40
 ID.nop: False
@@ -353,13 +423,13 @@ MEM.rd_mem: 0
 MEM.wrt_mem: 0
 MEM.wrt_enable: 1
 WB.nop: False
-WB.Wrt_data: 8
+WB.Wrt_data: 1
 WB.Rs: 00010
 WB.Rt: 00001
 WB.Wrt_reg_addr: 00101
 WB.wrt_enable: 1
 ----------------------------------------------------------------------
-State after executing cycle: 10
+State after executing cycle: 12
 IF.nop: False
 IF.PC: 44
 ID.nop: False
@@ -395,7 +465,7 @@ WB.Rt: 00001
 WB.Wrt_reg_addr: 00110
 WB.wrt_enable: 1
 ----------------------------------------------------------------------
-State after executing cycle: 11
+State after executing cycle: 13
 IF.nop: False
 IF.PC: 44
 ID.nop: False
@@ -430,7 +500,7 @@ WB.Rt: 00001
 WB.Wrt_reg_addr: 00111
 WB.wrt_enable: 1
 ----------------------------------------------------------------------
-State after executing cycle: 12
+State after executing cycle: 14
 IF.nop: False
 IF.PC: 44
 ID.nop: False
@@ -465,7 +535,7 @@ WB.Rt: 0
 WB.Wrt_reg_addr: 00010
 WB.wrt_enable: 1
 ----------------------------------------------------------------------
-State after executing cycle: 13
+State after executing cycle: 15
 IF.nop: False
 IF.PC: 48
 ID.nop: False
@@ -501,7 +571,7 @@ WB.Rt: 0
 WB.Wrt_reg_addr: 0
 WB.wrt_enable: 0
 ----------------------------------------------------------------------
-State after executing cycle: 14
+State after executing cycle: 16
 IF.nop: False
 IF.PC: 52
 ID.nop: False
@@ -537,7 +607,7 @@ WB.Rt: 0
 WB.Wrt_reg_addr: 0
 WB.wrt_enable: 0
 ----------------------------------------------------------------------
-State after executing cycle: 15
+State after executing cycle: 17
 IF.nop: False
 IF.PC: 56
 ID.nop: False
@@ -556,7 +626,7 @@ EX.wrt_mem: 0
 EX.alu_op: 10
 EX.wrt_enable: 0
 EX.is_load: 0
-EX.alu_control: 0010
+EX.alu_control: 0000
 MEM.nop: False
 MEM.ALUresult: -4294967288
 MEM.Store_data: 0
@@ -573,7 +643,7 @@ WB.Rt: 00010
 WB.Wrt_reg_addr: 01000
 WB.wrt_enable: 1
 ----------------------------------------------------------------------
-State after executing cycle: 16
+State after executing cycle: 18
 IF.nop: False
 IF.PC: 60
 ID.nop: False
@@ -594,7 +664,7 @@ EX.wrt_enable: 0
 EX.is_load: 0
 EX.alu_control: 0001
 MEM.nop: False
-MEM.ALUresult: 4294967298
+MEM.ALUresult: 5
 MEM.Store_data: 0
 MEM.Rs: 00010
 MEM.Rt: 00001
@@ -609,7 +679,7 @@ WB.Rt: 00010
 WB.Wrt_reg_addr: 01001
 WB.wrt_enable: 1
 ----------------------------------------------------------------------
-State after executing cycle: 17
+State after executing cycle: 19
 IF.nop: False
 IF.PC: 64
 ID.nop: False
@@ -639,13 +709,13 @@ MEM.rd_mem: 0
 MEM.wrt_mem: 0
 MEM.wrt_enable: 1
 WB.nop: False
-WB.Wrt_data: 4294967298
+WB.Wrt_data: 5
 WB.Rs: 00010
 WB.Rt: 00001
 WB.Wrt_reg_addr: 01010
 WB.wrt_enable: 1
 ----------------------------------------------------------------------
-State after executing cycle: 18
+State after executing cycle: 20
 IF.nop: False
 IF.PC: 68
 ID.nop: False
@@ -681,7 +751,7 @@ WB.Rt: 00001
 WB.Wrt_reg_addr: 01011
 WB.wrt_enable: 1
 ----------------------------------------------------------------------
-State after executing cycle: 19
+State after executing cycle: 21
 IF.nop: False
 IF.PC: 72
 ID.nop: False
@@ -717,13 +787,12 @@ WB.Rt: 00001
 WB.Wrt_reg_addr: 01100
 WB.wrt_enable: 1
 ----------------------------------------------------------------------
-State after executing cycle: 20
+State after executing cycle: 22
 IF.nop: False
-IF.PC: 76
+IF.PC: 72
 ID.nop: False
-ID.Instr: 40208733
-ID.PC: 76
-EX.nop: False
+ID.Instr: 002086b3
+EX.nop: True
 EX.Read_data1: 4294967291
 EX.Read_data2: 4294967293
 EX.Imm: 0
@@ -753,7 +822,78 @@ WB.Rt: 0
 WB.Wrt_reg_addr: 00001
 WB.wrt_enable: 1
 ----------------------------------------------------------------------
-State after executing cycle: 21
+State after executing cycle: 23
+IF.nop: False
+IF.PC: 72
+ID.nop: False
+ID.Instr: 002086b3
+EX.nop: True
+EX.Read_data1: 4294967291
+EX.Read_data2: 4294967293
+EX.Imm: 0
+EX.Rs: 00001
+EX.Rt: 00010
+EX.Wrt_reg_addr: 01101
+EX.is_I_type: False
+EX.rd_mem: 0
+EX.wrt_mem: 0
+EX.alu_op: 10
+EX.wrt_enable: 0
+EX.is_load: 0
+EX.alu_control: 0010
+MEM.nop: False
+MEM.ALUresult: 0
+MEM.Store_data: 0
+MEM.Rs: 0
+MEM.Rt: 0
+MEM.Wrt_reg_addr: 0
+MEM.rd_mem: 0
+MEM.wrt_mem: 0
+MEM.wrt_enable: 0
+WB.nop: False
+WB.Wrt_data: 2
+WB.Rs: 00000
+WB.Rt: 0
+WB.Wrt_reg_addr: 00010
+WB.wrt_enable: 1
+----------------------------------------------------------------------
+State after executing cycle: 24
+IF.nop: False
+IF.PC: 76
+ID.nop: False
+ID.Instr: 40208733
+ID.PC: 76
+EX.nop: False
+EX.Read_data1: 4294967291
+EX.Read_data2: 2
+EX.Imm: 0
+EX.Rs: 00001
+EX.Rt: 00010
+EX.Wrt_reg_addr: 01101
+EX.is_I_type: False
+EX.rd_mem: 0
+EX.wrt_mem: 0
+EX.alu_op: 10
+EX.wrt_enable: 0
+EX.is_load: 0
+EX.alu_control: 0010
+MEM.nop: False
+MEM.ALUresult: 0
+MEM.Store_data: 0
+MEM.Rs: 0
+MEM.Rt: 0
+MEM.Wrt_reg_addr: 0
+MEM.rd_mem: 0
+MEM.wrt_mem: 0
+MEM.wrt_enable: 0
+WB.nop: False
+WB.Wrt_data: 0
+WB.Rs: 0
+WB.Rt: 0
+WB.Wrt_reg_addr: 0
+WB.wrt_enable: 0
+----------------------------------------------------------------------
+State after executing cycle: 25
 IF.nop: False
 IF.PC: 80
 ID.nop: False
@@ -783,13 +923,13 @@ MEM.rd_mem: 0
 MEM.wrt_mem: 0
 MEM.wrt_enable: 1
 WB.nop: False
-WB.Wrt_data: 2
-WB.Rs: 00000
+WB.Wrt_data: 0
+WB.Rs: 0
 WB.Rt: 0
-WB.Wrt_reg_addr: 00010
-WB.wrt_enable: 1
+WB.Wrt_reg_addr: 0
+WB.wrt_enable: 0
 ----------------------------------------------------------------------
-State after executing cycle: 22
+State after executing cycle: 26
 IF.nop: False
 IF.PC: 84
 ID.nop: False
@@ -808,7 +948,7 @@ EX.wrt_mem: 0
 EX.alu_op: 10
 EX.wrt_enable: 0
 EX.is_load: 0
-EX.alu_control: 0010
+EX.alu_control: 0000
 MEM.nop: False
 MEM.ALUresult: 4294967289
 MEM.Store_data: 0
@@ -825,7 +965,7 @@ WB.Rt: 00010
 WB.Wrt_reg_addr: 01101
 WB.wrt_enable: 1
 ----------------------------------------------------------------------
-State after executing cycle: 23
+State after executing cycle: 27
 IF.nop: False
 IF.PC: 88
 ID.nop: False
@@ -846,7 +986,7 @@ EX.wrt_enable: 0
 EX.is_load: 0
 EX.alu_control: 0001
 MEM.nop: False
-MEM.ALUresult: 4294967293
+MEM.ALUresult: 2
 MEM.Store_data: 0
 MEM.Rs: 00010
 MEM.Rt: 00001
@@ -861,7 +1001,7 @@ WB.Rt: 00010
 WB.Wrt_reg_addr: 01110
 WB.wrt_enable: 1
 ----------------------------------------------------------------------
-State after executing cycle: 24
+State after executing cycle: 28
 IF.nop: False
 IF.PC: 92
 ID.nop: False
@@ -891,13 +1031,13 @@ MEM.rd_mem: 0
 MEM.wrt_mem: 0
 MEM.wrt_enable: 1
 WB.nop: False
-WB.Wrt_data: 4294967293
+WB.Wrt_data: 2
 WB.Rs: 00010
 WB.Rt: 00001
 WB.Wrt_reg_addr: 01111
 WB.wrt_enable: 1
 ----------------------------------------------------------------------
-State after executing cycle: 25
+State after executing cycle: 29
 IF.nop: False
 IF.PC: 96
 ID.nop: False
@@ -933,7 +1073,7 @@ WB.Rt: 00001
 WB.Wrt_reg_addr: 10000
 WB.wrt_enable: 1
 ----------------------------------------------------------------------
-State after executing cycle: 26
+State after executing cycle: 30
 IF.nop: False
 IF.PC: 100
 ID.nop: False
@@ -969,7 +1109,7 @@ WB.Rt: 00001
 WB.Wrt_reg_addr: 10001
 WB.wrt_enable: 1
 ----------------------------------------------------------------------
-State after executing cycle: 27
+State after executing cycle: 31
 IF.nop: False
 IF.PC: 104
 ID.nop: False
@@ -1005,7 +1145,7 @@ WB.Rt: 0
 WB.Wrt_reg_addr: 10010
 WB.wrt_enable: 1
 ----------------------------------------------------------------------
-State after executing cycle: 28
+State after executing cycle: 32
 IF.nop: False
 IF.PC: 108
 ID.nop: False
@@ -1041,7 +1181,7 @@ WB.Rt: 0
 WB.Wrt_reg_addr: 10011
 WB.wrt_enable: 1
 ----------------------------------------------------------------------
-State after executing cycle: 29
+State after executing cycle: 33
 IF.nop: False
 IF.PC: 112
 ID.nop: False
@@ -1077,7 +1217,7 @@ WB.Rt: 0
 WB.Wrt_reg_addr: 10100
 WB.wrt_enable: 1
 ----------------------------------------------------------------------
-State after executing cycle: 30
+State after executing cycle: 34
 IF.nop: False
 IF.PC: 116
 ID.nop: False
@@ -1113,7 +1253,7 @@ WB.Rt: 0
 WB.Wrt_reg_addr: 10101
 WB.wrt_enable: 1
 ----------------------------------------------------------------------
-State after executing cycle: 31
+State after executing cycle: 35
 IF.nop: False
 IF.PC: 120
 ID.nop: False
@@ -1149,7 +1289,7 @@ WB.Rt: 0
 WB.Wrt_reg_addr: 10110
 WB.wrt_enable: 1
 ----------------------------------------------------------------------
-State after executing cycle: 32
+State after executing cycle: 36
 IF.nop: False
 IF.PC: 124
 ID.nop: False
@@ -1185,7 +1325,7 @@ WB.Rt: 0
 WB.Wrt_reg_addr: 10111
 WB.wrt_enable: 1
 ----------------------------------------------------------------------
-State after executing cycle: 33
+State after executing cycle: 37
 IF.nop: False
 IF.PC: 128
 ID.nop: False
@@ -1221,7 +1361,7 @@ WB.Rt: 0
 WB.Wrt_reg_addr: 11000
 WB.wrt_enable: 1
 ----------------------------------------------------------------------
-State after executing cycle: 34
+State after executing cycle: 38
 IF.nop: False
 IF.PC: 132
 ID.nop: False
@@ -1257,7 +1397,7 @@ WB.Rt: 0
 WB.Wrt_reg_addr: 11001
 WB.wrt_enable: 1
 ----------------------------------------------------------------------
-State after executing cycle: 35
+State after executing cycle: 39
 IF.nop: False
 IF.PC: 136
 ID.nop: False
@@ -1293,7 +1433,7 @@ WB.Rt: 0
 WB.Wrt_reg_addr: 11010
 WB.wrt_enable: 1
 ----------------------------------------------------------------------
-State after executing cycle: 36
+State after executing cycle: 40
 IF.nop: False
 IF.PC: 140
 ID.nop: False
@@ -1329,7 +1469,7 @@ WB.Rt: 0
 WB.Wrt_reg_addr: 11011
 WB.wrt_enable: 1
 ----------------------------------------------------------------------
-State after executing cycle: 37
+State after executing cycle: 41
 IF.nop: False
 IF.PC: 144
 ID.nop: False
@@ -1365,7 +1505,7 @@ WB.Rt: 0
 WB.Wrt_reg_addr: 11100
 WB.wrt_enable: 1
 ----------------------------------------------------------------------
-State after executing cycle: 38
+State after executing cycle: 42
 IF.nop: False
 IF.PC: 148
 ID.nop: False
@@ -1401,7 +1541,7 @@ WB.Rt: 0
 WB.Wrt_reg_addr: 11101
 WB.wrt_enable: 1
 ----------------------------------------------------------------------
-State after executing cycle: 39
+State after executing cycle: 43
 IF.nop: False
 IF.PC: 152
 ID.nop: False
@@ -1437,7 +1577,7 @@ WB.Rt: 0
 WB.Wrt_reg_addr: 11110
 WB.wrt_enable: 1
 ----------------------------------------------------------------------
-State after executing cycle: 40
+State after executing cycle: 44
 IF.nop: False
 IF.PC: 156
 ID.nop: False
@@ -1473,7 +1613,7 @@ WB.Rt: 0
 WB.Wrt_reg_addr: 11111
 WB.wrt_enable: 1
 ----------------------------------------------------------------------
-State after executing cycle: 41
+State after executing cycle: 45
 IF.nop: True
 IF.PC: 0
 ID.nop: True
@@ -1508,7 +1648,7 @@ WB.Rt: 0
 WB.Wrt_reg_addr: 11111
 WB.wrt_enable: 1
 ----------------------------------------------------------------------
-State after executing cycle: 42
+State after executing cycle: 46
 IF.nop: True
 IF.PC: 0
 ID.nop: True
@@ -1543,7 +1683,7 @@ WB.Rt: 0
 WB.Wrt_reg_addr: 00000
 WB.wrt_enable: 1
 ----------------------------------------------------------------------
-State after executing cycle: 43
+State after executing cycle: 47
 IF.nop: True
 IF.PC: 0
 ID.nop: True
@@ -1578,7 +1718,7 @@ WB.Rt: 0
 WB.Wrt_reg_addr: 0
 WB.wrt_enable: 0
 ----------------------------------------------------------------------
-State after executing cycle: 44
+State after executing cycle: 48
 IF.nop: True
 IF.PC: 0
 ID.nop: True

@@ -1,12 +1,12 @@
 0:   LW R1, R0, #0          // Load from Mem[R0+0] to R1 - Val 5
 4:   LW R2, R0, #4          // Load from Mem[R0+4] to R2 - Val 3
-8:   ADD R3, R1, R2         // R3 = R1 + R2
-12:  SUB R4, R1, R2         // R4 = R1 - R2
-16:  SW R3, R0, #8          // Store R3 in Mem[R0+8]
-20:  SW R4, R0, #12         // Store R4 in Mem[R0+12]
-24:  AND R5, R1, R2 
-28:  OR R6, R1, R2  
-32:  XOR R7, R1, R2 
+8:   ADD R3, R1, R2         // R3 = R1 + R2 = 8
+12:  SUB R4, R1, R2         // R4 = R1 - R2 = 2
+16:  SW R3, R0, #8          // Store R3 in Mem[R0+8] - Val 8
+20:  SW R4, R0, #12         // Store R4 in Mem[R0+12] - Val 2
+24:  AND R5, R1, R2         // R5 = R1 & R2 = 1
+28:  OR R6, R1, R2          // R6 = R1 | R2 = 7
+32:  XOR R7, R1, R2         // R7 = R1 ^ R2 = 6
 36:  LW R2, R0, #16         // Load from Mem[R0+16] to R2 - Val -3
 40:  ADD R8, R1, R2         // R8 = R1 + R2
 44:  SUB R9, R1, R2         // R9 = R1 - R2

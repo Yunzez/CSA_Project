@@ -4,3 +4,35 @@
  4   ADDI x3, x0, 1       // This instruction is skipped if branch is taken
  5   LABEL: NOP           // Label destination, NOP for simplicity
  6   HALT                 // Halt execution
+
+
+1. 
+00000000
+01010000
+00000000
+10010011
+
+2.
+00000000
+01010000
+00000001
+00010011
+
+3. 
+00000000
+00100000
+10000100
+01100011
+
+
+4.
+00000000
+00010000
+00000001
+10010011
+
+5.
+00000000
+00000000
+00000000
+00000000

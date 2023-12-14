@@ -14,9 +14,19 @@ class DataMem(object):
         # Fetch the instruction from IMem
         data_parts = self.DMem[ReadAddress : ReadAddress + 4]
         data = "".join(data_parts)
-        print('data_parts', data)
-        # Convert to 32-bit hex (if not already)
-        data_decimal = int(data, 2) # Assuming instruction is a hex string without '0x'
+
+        # Convert to integer for bitwise operations
+        data_int = int(data, 2)
+
+        data_decimal = None
+        # Check if the data represents a negative number and handle accordingly
+        if data[0] == '1':  # Negative number in two's complement
+            # Convert to a negative number
+            data_int = ~data_int & 0xFFFFFFFF  # Bitwise NOT and mask to 32 bits
+            data_int += 1  # Add 1
+            data_decimal = -data_int
+        else:
+            data_decimal = data_int
 
         print("reading data from:", ReadAddress, "data:", data_decimal)
         return data_decimal

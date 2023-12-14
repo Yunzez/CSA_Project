@@ -1,5 +1,5 @@
-IO Directory: /Users/yunzezhao/Code/CSA_Project/yz8751/../output_yz8751/testcase1/PerformanceMetrics_Result.txt
+IO Directory: /Users/yunzezhao/Code/CSA_Project/yz8751/../output_yz8751/testcaseLoadNegative/PerformanceMetrics_Result.txt
 Single Stage Core Performance Metrics-----------------------------
 Number of cycles taken: 0
 Five Stage Core Performance Metrics-----------------------------
-Number of cycles taken: 49
+Number of cycles taken: 16
