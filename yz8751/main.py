@@ -472,9 +472,14 @@ class FiveStageCore(Core):
             # * EX to ID forwarding ----
             if not self.nextState.MEM["wrt_enable"]:
                 self.ex_to_id_forward_register.set_forward_data(self.state.EX["Wrt_reg_addr"], self.alu_result)
-                print("check ex to id forwarding:", self.ex_to_id_forward_register.toString())
+                print("push ex to id forwarding cuz wrt_enable in next state:", self.ex_to_id_forward_register.toString())
 
 
+            # ! suspecting
+            if self.state.EX["alu_op"] == "10":
+                self.ex_to_id_forward_register.set_forward_data(self.state.EX["Wrt_reg_addr"], self.alu_result)
+                print("push ex to id forwarding cuz alu op is R type:", self.ex_to_id_forward_register.toString())
+      
         # ! --------------------- ID stage ---------------------
         print("!----- ID -----!")
         print("ID state:", self.state.ID)
@@ -630,8 +635,7 @@ class FiveStageCore(Core):
 
                     # Set NOP for subsequent stages
                     self.nextState.EX["nop"] = True
-                    self.nextState.MEM["nop"] = True
-                    self.nextState.WB["nop"] = True
+
                 else:
                     if  decodeResult["type"] != "NOP":
                         self.nextState.EX["nop"] = False  
@@ -703,7 +707,7 @@ class FiveStageCore(Core):
         self.cycle += 1
 
         # # ! testing only
-        # if self.cycle > 10: 
+        # if self.cycle > 15: 
         #     self.halted = True
 
     def printState(self, state, cycle):

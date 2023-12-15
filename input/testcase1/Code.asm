@@ -8,15 +8,15 @@
 28:  OR R6, R1, R2          // R6 = R1 | R2 = 7
 32:  XOR R7, R1, R2         // R7 = R1 ^ R2 = 6
 36:  LW R2, R0, #16         // Load from Mem[R0+16] to R2 - Val -3
-40:  ADD R8, R1, R2         // R8 = R1 + R2
-44:  SUB R9, R1, R2         // R9 = R1 - R2
-58:  AND R10, R1, R2    
-52:  OR R11, R1, R2 
-56:  XOR R12, R1, R2    
+40:  ADD R8, R1, R2         // R8 = R1 + R2 = 2
+44:  SUB R9, R1, R2         // R9 = R1 - R2 = 8
+58:  AND R10, R1, R2        // R10 = R1 & R2 = 5
+52:  OR R11, R1, R2         // R11 = R1 | R2 = -3
+56:  XOR R12, R1, R2        // R12 = R1 ^ R2 = -8
 60:  LW R1, R0, #20         // Load from Mem[R0+20] to R1 - Val -5
 64:  LW R2, R0, #24         // Load from Mem[R0+24] to R2 - Val 2
-68:  ADD R13, R1, R2        // R13 = R1 + R2
-72:  SUB R14, R1, R2        // R14 = R1 - R2
+68:  ADD R13, R1, R2        // R13 = R1 + R2 = -3
+72:  SUB R14, R1, R2        // R14 = R1 - R2 = -7
 76:  AND R15, R1, R2
 80:  OR R16, R1, R2
 84:  XOR R17, R1, R2

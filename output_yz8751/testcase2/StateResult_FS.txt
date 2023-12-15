@@ -197,7 +197,7 @@ EX.alu_op: 01
 EX.wrt_enable: 0
 EX.is_load: 0
 EX.alu_control: 0110
-MEM.nop: True
+MEM.nop: False
 MEM.ALUresult: 0
 MEM.Store_data: 0
 MEM.Rs: 0
@@ -206,7 +206,7 @@ MEM.Wrt_reg_addr: 0
 MEM.rd_mem: 0
 MEM.wrt_mem: 0
 MEM.wrt_enable: 0
-WB.nop: True
+WB.nop: False
 WB.Wrt_data: 0
 WB.Rs: 0
 WB.Rt: 0
