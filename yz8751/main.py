@@ -76,8 +76,8 @@ class SingleStageCore(Core):
     def step(self):
         # * 1. Instruction Fetch (IF)
         current_instruction = self.ext_imem.readInstr(self.state.IF["PC"])
-        if current_instruction not in self.Instrs:
-            self.Instrs.append(current_instruction)
+        
+        self.Instrs.append(current_instruction)
         print(
             "pc:",
             self.state.IF["PC"],
@@ -682,8 +682,8 @@ class FiveStageCore(Core):
                 self.nextState.EX["nop"] = True
 
             
-            if current_instruction not in self.Instrs:
-                self.Instrs.append(current_instruction)
+            # if current_instruction not in self.Instrs:
+            self.Instrs.append(current_instruction)
 
             print(
                 "pc:",

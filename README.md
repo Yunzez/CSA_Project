@@ -6,6 +6,18 @@ NYU_netid = "yz8751"
 Class_name = "CSA"
 ```
 --- 
+**To run the project**
+
+```bash
+ python pr2359/main.py
+ # then a prompt would show:
+
+ Enter the name of the testcase you wish to use, testcase should be folder under the input folder: 
+
+ # input your folder name here: 
+ # it has to be under the testcase foler
+```
+
 
 This repository contains the implementation of a single-stage instruction cycle simulator and a five-stage instruction cycle simulater for educational purposes for **CSA** class at NYU. The simulator is designed to model the behavior of a simplified CPU as it processes instructions.
 
@@ -33,4 +45,9 @@ The decoder is a vital part of the simulator that interprets hexadecimal instruc
 
 the alu control decode the alu operation code into specific action while alu perform them.
 
+
+--- 
+## 5-Stage Simulator:
+
+Besides the above components, I added a **branch control unit** that prediects the branch results. I also added **Forwarding unit** that controls forwarding between MEM to ID and Ex to ID stage.
 
