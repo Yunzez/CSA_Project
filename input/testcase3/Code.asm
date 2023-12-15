@@ -12,7 +12,7 @@ def store(val):
 0:      LW R2, R0, #4    // 0x00400103 - Load from Mem[R0 + 4] into R2 - Val 5
 4:      LW R3, R0, #8    // 0x00800183 - Load from Mem[R0 + 8] into R3 - Val 10
 8:  B1: ADDI R4, R4, #1  // 0x00120213 - Increment R4 by 1
-12:     ADD R5, R4, R5   // 0x005202B3 - R5 = R4 + R5
+12:     ADD R5, R4, R5   // 0x005202B3 - R5 = R4 + R5   
 16:     BNE R5, R3, #8   // 0x00519463 - If R3 != R5 branch to B2
 20:     JAL R10, #12     // 0x00C0056F - Jump to FN and store PC + 4 in R10
 24: B2: BNE R4, R2, #-16 // 0xFE4118E3 - If R4 != R2 branch to B1

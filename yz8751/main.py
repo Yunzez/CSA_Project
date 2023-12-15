@@ -773,8 +773,8 @@ if __name__ == "__main__":
     fsCore = FiveStageCore(script_dir, imem, dmem_fs, testcase)
 
     while True:
-        # if not ssCore.halted:
-        #     ssCore.step()
+        if not ssCore.halted:
+            ssCore.step()
 
         # ! open the five step core later
         if not fsCore.halted:
@@ -782,7 +782,7 @@ if __name__ == "__main__":
             fsCore.step()
 
         # ! change to and statement later
-        if ssCore.halted or fsCore.halted:
+        if ssCore.halted and fsCore.halted:
             print("Finished simulation.")
             break
 
@@ -795,12 +795,12 @@ if __name__ == "__main__":
         f.write(f"IO Directory: {f.name}\n")
         f.write(f"Single Stage Core Performance Metrics-----------------------------\n")
         f.write(f"Number of cycles taken: {ssCore.cycle}\n")
-        # f.write(f"Cycles per instruction: {round(ssCore.cycle / len(ssCore.Instrs), 5)}\n")
-        # f.write(f"Instructions per cycle: {round( len(ssCore.Instrs) / ssCore.cycle, 6)}\n")
+        f.write(f"Cycles per instruction: {round(ssCore.cycle / len(ssCore.Instrs), 5)}\n")
+        f.write(f"Instructions per cycle: {round( len(ssCore.Instrs) / ssCore.cycle, 6)}\n")
 
         f.write(f"Five Stage Core Performance Metrics-----------------------------\n")
         f.write(f"Number of cycles taken: {fsCore.cycle}\n")
-        # f.write(f"Cycles per instruction: {round(fsCore.cycle/len(fsCore.Instrs) ,5)}\n")
-        # f.write(f"Instructions per cycle: {round(len(fsCore.Instrs)/fsCore.cycle , 6)}\n")
+        f.write(f"Cycles per instruction: {round(fsCore.cycle/len(fsCore.Instrs) ,5)}\n")
+        f.write(f"Instructions per cycle: {round(len(fsCore.Instrs)/fsCore.cycle , 6)}\n")
 
 
